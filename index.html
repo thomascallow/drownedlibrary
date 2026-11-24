@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drowned Library</title>
+<meta name="description" content="Sail a drowned globe, drop a line, and raise the poems that were written beneath you.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap" rel="stylesheet">
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+<div id="vignette" aria-hidden="true"></div>
+<div id="flash" class="flash" aria-hidden="true"></div>
+
+<div id="hud">
+  <header class="top">
+    <div class="where">
+      <h1 class="mark">Drowned Library</h1>
+      <p id="place" class="place">Open water</p>
+      <p id="region" class="region" hidden></p>
+      <p id="coords" class="coords"></p>
+      <p id="trail" class="trail" hidden><span id="trail-text"></span><button id="trail-clear" class="linkish" type="button">Clear</button></p>
+      <p id="below" class="below" hidden></p>
+    </div>
+    <nav class="tools" aria-label="Site">
+      <button id="btn-journal" class="pill" type="button">Journal <span id="journal-count" class="count">0</span></button>
+      <button id="btn-globe" class="pill" type="button" aria-pressed="false">Globe</button>
+      <button id="btn-sound" class="pill" type="button" aria-pressed="true">Sound on</button>
+      <button id="btn-menu" class="pill" type="button">Menu</button>
+    </nav>
+  </header>
+
+  <div id="meter" class="meter" hidden>
+    <div class="meter-zones" aria-hidden="true">
+      <p style="top:0%"><b>Shallows</b><i>the last hundred years</i></p>
+      <p style="top:25%"><b>Middle water</b><i>the 1800s</i></p>
+      <p style="top:50%"><b>The deep</b><i>1500 to 1800</i></p>
+      <p style="top:75%"><b>The abyss</b><i>the oldest words</i></p>
+    </div>
+    <div class="meter-track" id="meter-track" aria-hidden="true">
+      <span class="tick" style="top:25%"></span><span class="tick" style="top:50%"></span><span class="tick" style="top:75%"></span>
+      <span id="meter-set" class="meter-set" hidden></span>
+      <span id="meter-mark" class="meter-mark"></span>
+      <span id="meter-lure" class="meter-lure" hidden></span>
+    </div>
+    <p class="meter-read"><span id="meter-num">0</span> fathoms</p>
+  </div>
+
+  <footer class="bottom">
+    <div class="pad pad-steer">
+      <button id="t-left" type="button" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button id="t-right" type="button" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="act">
+      <div id="power" class="tension power" hidden><span id="power-mark" class="tm"></span><em class="tl l">near</em><em class="tl r">far</em></div>
+      <div id="tension" class="tension" hidden><span class="tz"></span><span id="tension-mark" class="tm"></span><em class="tl l">resting</em><em class="tl r">pulling</em></div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <div id="weigh-manual" class="weigh-manual" hidden>
+        <label id="weigh-label" for="weigh-range">Depth, in fathoms</label>
+        <input id="weigh-range" type="range" min="2" max="100" step="1" value="30">
+      </div>
+      <button id="btn-cast" class="primary" type="button">Cast a line</button>
+      <p id="hint" class="hint">Arrow keys or WASD to row. Space to cast.</p>
+    </div>
+    <div class="pad pad-throttle">
+      <button id="t-up" type="button" aria-label="Sail forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg></button>
+      <button id="t-down" type="button" aria-label="Back up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></button>
+    </div>
+  </footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden>
+  <p id="toast-title" class="toast-title"></p>
+  <p id="toast-text" class="toast-text"></p>
+  <button id="toast-act" class="toast-act" type="button" hidden></button>
+  <div class="toast-foot"><span id="toast-more" class="toast-more"></span><button id="toast-next" class="toast-next" type="button">Dismiss</button></div>
+</div>
+
+<div id="veil" class="veil" aria-hidden="true"><p>The current carries you</p></div>
+<div id="scrim" class="scrim" hidden></div>
+
+<section id="dlg-story" class="sheet sheet-story" role="dialog" aria-modal="true" aria-labelledby="story-title" hidden>
+  <h2 id="story-title" class="sheet-title">What the water could not erase</h2>
+  <p>It happened slowly, then all at once. The sea climbed the steps of every city until the lands were gone, and the roads, and the libraries with them. That was a very long time ago. No one left alive remembers the shore.</p>
+  <p>But ink is stubborn. The poems are still down there, settled in the silt above the places where they were written, beneath the countries the old maps drew. Recent ones lie in the shallows. Older words have sunk deeper.</p>
+  <p>You have a boat, a line, and a lure you can weight to any depth. The water is murky, but where you stop to fish it clears, and you may see what still stands below. Sometimes you raise a poem, sometimes a boot.</p>
+  <p class="quiet">Whatever you raise is written into your Angler’s journal, which is kept in this browser.</p>
+  <dl class="keys">
+    <div><dt>Row</dt><dd>Arrow keys or WASD, or the buttons on a touch screen</dd></div>
+    <div><dt>Fish</dt><dd>Space to cast: the first press sets how far, the second sets how deep. Then hold Space to reel when something bites</dd></div>
+    <div><dt>Look</dt><dd>G shows the globe. Drag to turn it, click a country to sail there</dd></div>
+    <div><dt><i>Read</i></dt><dd>R opens your journal, where every poem you have raised waits to be read again</dd></div>
+    <div><dt>Rest</dt><dd>Z hides the interface and lets the boat drift</dd></div>
+    <div><dt>Watch</dt><dd>Bottles drift by on the water. Keep an eye out for them</dd></div>
+  </dl>
+  <div class="sheet-actions story-actions">
+    <button id="story-go" class="primary" type="button">Take the tiller</button>
+    <button id="story-back" class="ghost" type="button" hidden>Back to Menu</button>
+    <button id="story-x" class="story-x" type="button" aria-label="A small ink cross" hidden><svg viewBox="0 0 60 60" aria-hidden="true"><defs><filter id="inkrough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/></filter></defs><g filter="url(#inkrough)"><path pathLength="1" d="M11 13 C 22 22, 35 37, 50 49"/><path pathLength="1" d="M49 11 C 38 22, 24 35, 10 48"/></g></svg></button>
+  </div>
+</section>
+
+<section id="dlg-catch" tabindex="-1" class="sheet sheet-catch" role="dialog" aria-modal="true" aria-labelledby="catch-title" hidden>
+  <p id="catch-kicker" class="kicker"></p>
+  <h2 id="catch-title" class="sheet-title"></h2>
+  <p id="catch-by" class="byline"></p>
+  <div id="catch-poem" class="poem"></div>
+  <p id="catch-lost" class="lost" hidden>The pages are gone. Only the catalogue card survived.</p>
+  <p id="catch-note" class="note"></p>
+  <div id="catch-links"></div>
+  <label class="margin"><span>A note in the margin</span><input id="catch-margin" type="text" maxlength="140" placeholder="Where were you? What did it remind you of?" autocomplete="off"></label>
+  <p id="catch-kept" class="kept"></p>
+  <div class="sheet-actions">
+    <button id="catch-again" class="primary" type="button">Cast again</button>
+    <button id="catch-read" class="ghost" type="button">Read quietly</button>
+    <button id="catch-share" class="ghost" type="button">Share</button>
+    <button id="catch-sail" class="ghost" type="button">Sail on</button>
+  </div>
+</section>
+
+<section id="dlg-journal" class="sheet sheet-journal" role="dialog" aria-modal="true" aria-labelledby="journal-title" hidden>
+  <div class="sheet-head">
+    <h2 id="journal-title" class="sheet-title">Angler’s journal</h2>
+    <button class="close" type="button" data-close aria-label="Close the journal">Close</button>
+  </div>
+  <p id="journal-rank" class="rank"></p>
+  <p id="journal-sum" class="quiet"></p>
+  <div class="bar"><i id="journal-bar"></i></div>
+  <div class="tabs" role="tablist">
+    <button id="jt-entries" role="tab" aria-selected="true" type="button">Entries</button>
+    <button id="jt-map" role="tab" aria-selected="false" type="button">Map</button>
+    <button id="jt-found" role="tab" aria-selected="false" type="button">Found</button>
+  </div>
+  <div id="tab-entries">
+  <div id="journal-list" class="journal-list"></div>
+  <p id="journal-odd" class="quiet"></p>
+  <div class="sheet-actions">
+    <button id="journal-save" class="primary" type="button">Save as a text file</button>
+    <button id="journal-copy" class="ghost" type="button">Copy the journal</button>
+    <button id="journal-clear" class="ghost danger" type="button">Empty the journal</button>
+  </div>
+  <p id="journal-msg" class="quiet" role="status" aria-live="polite"></p>
+  <textarea id="journal-raw" class="raw" readonly hidden aria-label="Journal as plain text"></textarea>
+  </div>
+  <div id="tab-map" hidden><canvas id="journal-map" aria-label="Map of your catches"></canvas><p id="map-cap" class="quiet"></p></div>
+  <div id="tab-found" hidden><div id="found-list"></div></div>
+</section>
+
+<section id="dlg-menu" class="sheet sheet-menu" role="dialog" aria-modal="true" aria-labelledby="menu-title" hidden>
+  <div class="sheet-head">
+    <h2 id="menu-title" class="sheet-title">Menu</h2>
+    <button class="close" type="button" data-close aria-label="Close the menu">Close</button>
+  </div>
+  <div class="menu-list">
+    <button id="menu-story" class="row" type="button"><b>Read the story</b><i>What the water could not erase</i></button>
+    <button id="menu-drift" class="row" type="button"><b>Drift to another shore</b><i>Let the current carry the boat somewhere books went down</i></button>
+    <button id="menu-globe" class="row" type="button"><b>See the whole globe</b><i>Pull back to find where you are</i></button>
+    <button id="menu-tackle" class="row" type="button"><b>Tackle box</b><i id="tackle-sub">Silver lure</i></button>
+    <button id="menu-closet" class="row" type="button"><b>Davy Jones’ Closet</b><i id="closet-sub">Hats you have found at landmarks</i></button>
+    <button id="menu-reset" class="row" type="button"><b>Return to the starting waters</b><i>The drowned Irish Sea, with poets close by on every side</i></button>
+  </div>
+  <fieldset class="light">
+    <legend>Visibility</legend>
+    <div class="vis-row"><span>Misty</span><input id="vis-range" type="range" min="0" max="100" step="1" value="55" aria-label="How far you can see across the water"><span>Clear</span></div>
+    <p class="quiet">How far you can see across the water.</p>
+  </fieldset>
+  <fieldset class="light">
+    <legend>Light</legend>
+    <div class="seg" id="light-seg">
+      <button type="button" data-light="now" aria-pressed="true">Now</button>
+      <button type="button" data-light="dawn" aria-pressed="false">Dawn</button>
+      <button type="button" data-light="day" aria-pressed="false">Day</button>
+      <button type="button" data-light="dusk" aria-pressed="false">Dusk</button>
+      <button type="button" data-light="night" aria-pressed="false">Night</button>
+    </div>
+    <p class="quiet">The sea follows your local time unless you choose otherwise.</p>
+  </fieldset>
+  <p class="quiet colophon">Poems first published before 1929 are given in full. Poems from other languages are in plain English renderings made for this site. Newer work appears as a catalogue card, with the title and poet, for you to find on dry land. <button id="menu-submit" class="linkish" type="button">Suggest a poem for the library</button></p>
+</section>
+
+<section id="dlg-submit" class="sheet sheet-menu sheet-submit" role="dialog" aria-modal="true" aria-labelledby="submit-title" hidden>
+  <div class="sheet-head">
+    <button id="submit-back" class="back" type="button">&larr; Menu</button>
+    <button class="close" type="button" data-close aria-label="Close">Close</button>
+  </div>
+  <h2 id="submit-title" class="sheet-title">Add a poem to the library</h2>
+  <p class="quiet closet-intro">Send a poem of your own, or a favourite, to the librarian. It could be added to its country, and the books on the sea floor there.</p>
+  <div id="submit-form">
+    <fieldset class="sub-kind"><legend class="vh">What are you sending?</legend>
+      <label><input type="radio" name="sub-kind" value="own" checked> A poem I wrote</label>
+      <label><input type="radio" name="sub-kind" value="fav"> A poem I love</label>
+    </fieldset>
+    <label class="margin"><span>Country it belongs to</span><select id="sub-country"></select></label>
+    <label class="margin"><span>Title of the poem</span><input id="sub-title" type="text" maxlength="140" autocomplete="off"></label>
+    <label class="margin" id="sub-poet-wrap"><span>Poet (if it is not you)</span><input id="sub-poet" type="text" maxlength="140" autocomplete="off"></label>
+    <label class="margin"><span id="sub-text-lab">The poem itself</span><textarea id="sub-text" rows="6" maxlength="3000"></textarea></label>
+    <label class="margin"><span>Where it is from (a book, a year, a place)</span><input id="sub-source" type="text" maxlength="200" autocomplete="off"></label>
+    <label class="margin"><span id="sub-why-lab">What it is about, and what you love about it</span><textarea id="sub-why" rows="4" maxlength="1200"></textarea></label>
+    <label class="margin"><span>Your socials or Wikipedia page (optional)</span><input id="sub-link" type="text" maxlength="240" autocomplete="off" placeholder="https://"></label>
+    <label class="margin"><span>Your name, as you would like it shown (optional)</span><input id="sub-name" type="text" maxlength="100" autocomplete="off"></label>
+    <label class="sub-rights"><input id="sub-rights" type="checkbox"> <span id="sub-rights-lab">This poem is mine, and I am happy for it to appear in the library.</span></label>
+    <p id="sub-msg" class="quiet" role="status"></p>
+    <div class="sheet-actions"><button id="sub-prepare" class="primary" type="button">Prepare my email</button><button id="sub-cancel" class="ghost" type="button">Cancel</button></div>
+  </div>
+  <div id="submit-review" hidden>
+    <p class="quiet">This site has no server of its own, so the message opens in your email app and nothing is sent until you press send. It goes to <b>librarian@drownedlibrary.org</b>.</p>
+    <textarea id="sub-preview" rows="12" readonly aria-label="The message that will be sent"></textarea>
+    <div class="sheet-actions"><a id="sub-mailto" class="primary as-link" href="#">Open my email app</a><button id="sub-copy" class="ghost" type="button">Copy the text</button><button id="sub-edit" class="ghost" type="button">Back to the form</button></div>
+    <p id="sub-copied" class="quiet" role="status"></p>
+  </div>
+</section>
+
+<section id="dlg-countries" class="sheet sheet-journal" role="dialog" aria-modal="true" aria-labelledby="countries-title" hidden>
+  <div class="sheet-head">
+    <button id="countries-back" class="back" type="button">&larr; Journal</button>
+    <button class="close" type="button" data-close aria-label="Close">Close</button>
+  </div>
+  <h2 id="countries-title" class="sheet-title">Countries lit</h2>
+  <p id="countries-sum" class="quiet"></p>
+  <ul id="countries-list" class="sub-list"></ul>
+</section>
+
+<section id="dlg-landmarks" class="sheet sheet-journal" role="dialog" aria-modal="true" aria-labelledby="landmarks-title" hidden>
+  <div class="sheet-head">
+    <button id="landmarks-back" class="back" type="button">&larr; Journal</button>
+    <button class="close" type="button" data-close aria-label="Close">Close</button>
+  </div>
+  <h2 id="landmarks-title" class="sheet-title">Landmarks found</h2>
+  <p id="landmarks-sum" class="quiet"></p>
+  <ul id="landmarks-list" class="sub-list"></ul>
+</section>
+
+<section id="dlg-tackle" class="sheet sheet-menu sheet-closet" role="dialog" aria-modal="true" aria-labelledby="tackle-title" hidden>
+  <div class="sheet-head">
+    <button id="tackle-back" class="back" type="button">&larr; Menu</button>
+    <button class="close" type="button" data-close aria-label="Close the tackle box">Close</button>
+  </div>
+  <h2 id="tackle-title" class="sheet-title">Tackle box</h2>
+  <p class="quiet closet-intro">Each lure leans toward a certain kind of poem. Choose one to fish with.</p>
+  <div id="lure-grid" class="hat-grid" role="group" aria-label="Lures"></div>
+  <p id="lure-desc" class="quiet"></p>
+</section>
+
+<section id="dlg-closet" class="sheet sheet-menu sheet-closet" role="dialog" aria-modal="true" aria-labelledby="closet-title" hidden>
+  <div class="sheet-head">
+    <button id="closet-back" class="back" type="button">&larr; Menu</button>
+    <button class="close" type="button" data-close aria-label="Close the closet">Close</button>
+  </div>
+  <h2 id="closet-title" class="sheet-title">Davy Jones’ Closet</h2>
+  <p class="quiet closet-intro">Hats washed up from every shore. Choose one to wear.</p>
+  <div id="hat-grid" class="hat-grid" role="group" aria-label="Hats"></div>
+  <p id="hat-desc" class="quiet"></p>
+</section>
+
+<section id="dlg-read" class="sheet sheet-read" role="dialog" aria-modal="true" aria-labelledby="read-title" hidden>
+  <div class="read-top"><button id="read-close" class="close" type="button" data-close aria-label="Close reading mode">Close</button></div>
+  <div class="read-col">
+    <p id="read-kicker" class="kicker"></p>
+    <h2 id="read-title" class="sheet-title"></h2>
+    <p id="read-by" class="byline"></p>
+    <div id="read-poem" class="poem poem-big"></div>
+    <p id="read-note" class="note"></p>
+    <div id="read-links"></div>
+    <div class="sheet-actions"><button id="read-aloud" class="primary" type="button">Read aloud</button><button id="read-share" class="ghost" type="button">Share this catch</button></div>
+    <label class="margin" id="voice-wrap" hidden><span>Voice</span><select id="voice-select" aria-label="Choose a reading voice"></select></label>
+  </div>
+</section>
+<section id="dlg-share" class="sheet sheet-share" role="dialog" aria-modal="true" aria-labelledby="share-title" hidden>
+  <h2 id="share-title" class="sheet-title">Share this catch</h2>
+  <img id="share-img" alt="Your catch as a card">
+  <p class="quiet">If saving does nothing here, press and hold the image to save it.</p>
+  <div class="sheet-actions"><button id="share-native" class="primary" type="button" hidden>Share</button><a id="share-save" class="ghost linkbtn" href="#" download="catch.png">Save image</a><button id="share-close" class="ghost" type="button" data-close>Close</button></div>
+</section>
+<section id="dlg-lure" class="sheet sheet-lure" role="dialog" aria-modal="true" aria-labelledby="lure-pop-title" hidden>
+  <p class="kicker">A new lure</p>
+  <h2 id="lure-pop-title" class="sheet-title"></h2>
+  <p id="lure-pop-text"></p>
+  <p class="quiet">You can change lures at any time from <b>Menu, then Tackle box</b>.</p>
+  <div class="sheet-actions"><button id="lure-pop-open" class="primary" type="button">Open the tackle box</button><button id="lure-pop-later" class="ghost" type="button">Later</button></div>
+</section>
+<p id="resthint" class="resthint" hidden>Resting. Press any key, or tap, to return.</p>
+<div id="hovertip" class="hovertip" hidden></div>
+<noscript><p class="nojs">Drowned Library needs JavaScript to sail.</p></noscript>
+<!--__THREE__-->
+<!--__PAKO__-->
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>
