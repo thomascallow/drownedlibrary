@@ -5432,18 +5432,18 @@ window.DL_SND = (function () {
     /* hull: a smooth planked shell, sheer rising to the bow, teal wale, navy keel */
     (function () {
       var NZ = 26, NP = 16, zs = -1.0, zb = 1.4, pos = [], col = [], idx = [], cCream = new THREE.Color(0xF0EADC), cTeal = new THREE.Color(0x2F7F88), cNavy = new THREE.Color(0x1C2A40), cc = new THREE.Color(), i, j, u, pr, z;
-      function prof(u2) { return [0.6 * (1 - Math.pow(u2, 2.2)) * (0.82 + 0.18 * Math.min(1, u2 * 4)), 0.4 + 0.16 * u2 * u2, 0.52 * (1 - 0.5 * Math.pow(u2, 2.5))]; }
+      function prof(u2) { var rs = u2 < 0.14 ? Math.sqrt(Math.max(0.02, 1 - Math.pow((0.14 - u2) / 0.14, 2))) : 1; return [0.6 * (1 - Math.pow(u2, 2.2)) * (0.82 + 0.18 * Math.min(1, u2 * 4)) * rs, 0.4 + 0.16 * u2 * u2, 0.52 * (1 - 0.5 * Math.pow(u2, 2.5)) * (0.55 + 0.45 * rs)]; }
       for (i = 0; i <= NZ; i++) {
         u = i / NZ; pr = prof(u); z = lerp(zs, zb, u);
         for (j = 0; j <= NP; j++) {
           var ph = j / NP * Math.PI, tt = Math.abs(j / NP - 0.5) * 2;
           pos.push(pr[0] * Math.cos(ph), pr[1] - pr[2] * Math.pow(Math.sin(ph), 0.85), z);
-          cc.copy(cNavy); if (tt > 0.66) cc.lerp(cTeal, smooth((tt - 0.66) / 0.06)); if (tt > 0.82) cc.lerp(cCream, smooth((tt - 0.82) / 0.05));
+          cc.copy(cNavy); if (tt > 0.5) cc.lerp(cTeal, smooth((tt - 0.5) / 0.05)); if (tt > 0.72) cc.lerp(cCream, smooth((tt - 0.72) / 0.05));
           col.push(cc.r, cc.g, cc.b);
         }
       }
       for (i = 0; i < NZ; i++) for (j = 0; j < NP; j++) { var a0 = i * (NP + 1) + j, b0 = a0 + 1, c0 = a0 + NP + 1, d0 = c0 + 1; idx.push(a0, c0, b0, b0, c0, d0); }
-      var cen = pos.length / 3; pr = prof(0); pos.push(0, pr[1] - pr[2] * 0.5, zs); col.push(0.78, 0.7, 0.58);
+      var cen = pos.length / 3; pr = prof(0); pos.push(0, pr[1] - pr[2] * 0.5, zs); col.push(0.94, 0.9, 0.82);
       for (j = 0; j < NP; j++) idx.push(cen, j, j + 1);
       var hg = new THREE.BufferGeometry(); hg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3)); hg.setAttribute('color', new THREE.BufferAttribute(new Float32Array(col), 3)); hg.setIndex(idx); hg.computeVertexNormals();
       var hull = new THREE.Mesh(hg, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.05, side: THREE.DoubleSide })); hull.castShadow = true; boatInner.add(hull);
@@ -5459,7 +5459,7 @@ window.DL_SND = (function () {
       for (i = NZ - 1; i >= 0; i--) { u = i / NZ; pr = prof(u); pts.push(new V3(pr[0] * 0.99, pr[1] + 0.02, lerp(zs, zb, u))); }
       var rail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 110, 0.028, 6, true), new THREE.MeshStandardMaterial({ color: 0x8A5C3A, roughness: 0.7 })); rail.castShadow = true; boatInner.add(rail);
     })();
-    part(boatInner, box(0.95, 0.05, 0.2), M.wood, 0, 0.35, -0.28); part(boatInner, box(0.55, 0.05, 0.2), M.wood, 0, 0.37, 0.75); part(boatInner, box(0.9, 0.06, 0.16), M.wood, 0, 0.36, -0.86);
+    part(boatInner, box(0.95, 0.05, 0.2), M.wood, 0, 0.35, -0.28); part(boatInner, box(0.55, 0.05, 0.2), M.wood, 0, 0.37, 0.75); part(boatInner, box(0.72, 0.06, 0.16), M.wood, 0, 0.36, -0.82);
     part(boatInner, box(0.04, 0.04, 0.55), M.wood, 0, 0.5, -1.15); part(boatInner, box(0.04, 0.46, 0.18), M.mast, 0, 0.12, -1.04);
     part(boatInner, cyl(0.03, 0.05, 3.1, 10), M.mast, 0, 1.7, 0.55);
     var rigM = new THREE.LineBasicMaterial({ color: 0x4A3A2C });
@@ -6193,7 +6193,7 @@ window.DL_SND = (function () {
   $('menu-globe').addEventListener('click', function () { closeSheet(); if (fish.state === 'idle') setGlobe(zoomTarget < 0.5); });
   /* the first time you take the tiller, you sign the note with a quill: an X, scratched in ink */
   var KEY_X = 'drownedLibrary.mark.v1', markDone = !!store.get(KEY_X, false), markBusy = false;
-  function prepStory(fromMenu) { var x = $('story-x'); $('story-back').hidden = !fromMenu; x.hidden = !markDone; x.classList.toggle('drawn', markDone); x.classList.remove('drawing', 'wobble'); x.disabled = false; }
+  function prepStory(fromMenu) { var x = $('story-x'); $('story-back').hidden = !fromMenu; x.hidden = !markDone; x.classList.toggle('drawn', markDone); x.classList.remove('drawing', 'wobble'); x.disabled = !!(typeof secretHat !== 'undefined' && secretHat); }
   $('story-go').addEventListener('click', function () {
     if (markBusy) return;
     if (markDone) { closeSheet(true); ui.cast.focus(); return; }
@@ -6398,7 +6398,7 @@ window.DL_SND = (function () {
     var hA = wave(px + f.x, py + f.y, pz + f.z), hB = wave(px - f.x, py - f.y, pz - f.z);
     var hL = wave(px - right.x, py - right.y, pz - right.z), hR = wave(px + right.x, py + right.y, pz + right.z);
     boatH += (h0 - boatH) * Math.min(1, curDt * 5); camHs += (h0 - camHs) * Math.min(1, curDt * 1.2);
-    boatWorld.copy(p).multiplyScalar(R + boatH + 0.1);
+    boatWorld.copy(p).multiplyScalar(R + boatH - 0.15);
     _left.copy(right).multiplyScalar(-1);
     _m4.makeBasis(_left, p, f);
     boatGroup.quaternion.setFromRotationMatrix(_m4);
@@ -6963,15 +6963,15 @@ window.DL_SND = (function () {
   /* a marked place: compass words in the corner, and a book that winks when you are close */
   /* curious fingers: the console, the locked tiles, the hidden coin */
   var duckMode = 0, trapN = 0, TRAPS = [
-    ['Nice try', 'That lock is more of a suggestion than a lock. The Librarian saw you reach for it, and a rubber duck is on its way.'],
-    ['The Librarian clears their throat', 'You have found the back door. It leads, rather awkwardly, to the front door. Please go round.'],
-    ['A small, polite cough', 'Everything in the box is earned by sailing, fishing or reading. Shortcuts are sold at the shop, which is closed.'],
+    ['The Librarian looks over their reading glasses at you', 'That lock is more of a suggestion than a lock. Nonetheless, a rubber duck is on its way.'],
+    ['The Librarian clears their throat', 'You have found the back door. It leads, rather awkwardly, to the front door. Please go around.'],
+    ['A small, polite cough', 'Shortcuts are sold at the shop, which is closed.'],
     ['Ahoy, curious one', 'The books taste better wet. Off you go.']];
   function cheatTrap() { var t = TRAPS[trapN % TRAPS.length]; trapN++; duckMode = Math.min(3, duckMode + 2); toast(t[0], t[1], 9000, null, true); if (snd) snd.click(); }
   (function () {
     ['unlockAll', 'godMode', 'cheat', 'cheats', 'giveMeEverything', 'giveAll', 'unlock', 'addPoems', 'setCasts', 'resetProgress', 'iddqd'].forEach(function (n) { try { if (!(n in window)) window[n] = function () { cheatTrap(); return 'The Librarian wishes you fair winds, and gently declines.'; }; } catch (e) {} });
     try { if (!window.__dl) window.__dl = function () { cheatTrap(); return 'Nothing to see here but water.'; }; } catch (e) {}
-    try { console.log('%cAhoy, curious one.', 'font: italic 600 18px Georgia, serif; color: #1B2A52;', '\nYou have found the console. The Librarian waves, and asks only that you earn the books the long way round. They taste better wet.'); } catch (e) {}
+    try { console.log('%cAhoy, curious one.', 'font: italic 600 18px Georgia, serif; color: #1B2A52;', '\nYou have found the console. The Librarian waves, and so does the ocean.'); } catch (e) {}
   })();
   var KEY_TR = 'drownedLibrary.trail.v1', trailE = byId[store.get(KEY_TR, '')] || null, winkG = null, trailLast = 0, trailArrived = false;
   var DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
@@ -7815,10 +7815,11 @@ function openCloset() { openSheet('dlg-closet', 'closet-back'); makePreviews(); 
 $('menu-closet').addEventListener('click', openCloset);
 $('closet-back').addEventListener('click', function () { openSheet('dlg-menu', 'menu-closet'); });
 function unlockSecretHat() {
-  var x = $('story-x'); x.classList.remove('wobble'); void x.offsetWidth; x.classList.add('wobble');
-  if (secretHat) return;
+  var x = $('story-x'); if (secretHat) { x.disabled = true; return; }
+  x.classList.remove('wobble'); void x.offsetWidth; x.classList.add('wobble');
   secretHat = true; store.set(KEY_SH, true); unlockedH.push('spotted'); store.set(KEY_HU, unlockedH); buildCloset(); if (snd) snd.chime();
-  toast('Something was hidden under the mark', 'A spotted hat. Find it in Davy Jones’ Closet, in the Menu.', 9000);
+  setTimeout(function () { x.disabled = true; }, 520);
+  toast('X marks the spot-ted hat.', 'Find it in Davy Jones’ Closet.', 9000, null, true);
 }
 function checkHats(announce) {
   var fresh = []; HATS.forEach(function (H) { if (hatOpen(H) && unlockedH.indexOf(H.id) < 0) { unlockedH.push(H.id); fresh.push(H); } });
@@ -7936,7 +7937,7 @@ $('sub-copy').addEventListener('click', function () {
 if (tamperLog.length) setTimeout(function () {
   var names = { casts: 'cast count', wonders: 'weather log', lureUnlocked: 'tackle box', hatsUnlocked: 'closet', secretHat: 'closet', lights: 'lantern log', landmarks: 'landmark list', doubloon: 'coin purse', mark: 'signature', daily: 'bottle diary', oddments: 'odds and ends', journal: 'journal' }, seen = {}, list = [];
   tamperLog.forEach(function (k) { var n = names[k.replace('drownedLibrary.', '').replace(/\.v\d$/, '')] || 'journal'; if (!seen[n]) { seen[n] = 1; list.push(n); } });
-  toast('Pencil marks in the margins', 'The Librarian found some tidy corrections in your ' + list.join(', ') + ', rubbed them out, and left a note: “It is much more fun when you earn it.” Nothing else was touched.', 14000);
+  toast('Pencil marks in the margins', 'The Librarian found some tidy corrections in your ' + list.join(', ') + ', rubbed them out, and wanted to remind you that we do not doodle on the books', 14000);
 }, 2600);
 
 
