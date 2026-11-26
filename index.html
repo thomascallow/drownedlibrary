@@ -8584,13 +8584,18 @@ window.DL_SND = (function () {
      ------------------------------------------------------------------ */
   function wikiSearch(q) { return 'https://en.wikipedia.org/w/index.php?search=' + encodeURIComponent(q) + '&go=Go'; }
   function wikiPoem(e) { return e.w ? 'https://en.wikipedia.org/wiki/' + encodeURIComponent(e.w.replace(/ /g, '_')) : wikiSearch(e.t + ' poem ' + e.p.replace(/^attributed to /, '')); }
+  /* a poem written for the library has no author to look up, and one with no name to its credit (an unknown monk, a traditional song) has nobody to search for either */
+  function authorless(e) { return /^written for the library/i.test(e.p); }
+  function unnamedAuthor(e) { return !authorless(e) && /^(an? )?(unknown|anonymous|traditional)\b/i.test(e.p); }
+  function hasAuthor(e) { return !authorless(e) && !unnamedAuthor(e); }
   function wikiPoet(e) { return wikiSearch(e.p.replace(/^attributed to /, '')); }
   function addLinks(parent, e) {
     var pp = document.createElement('p'); pp.className = 'links';
     function a(href, txt) { var l = document.createElement('a'); l.href = href; l.target = '_blank'; l.rel = 'noopener noreferrer'; l.textContent = txt; pp.appendChild(l); }
     if (e.k === 'card') a(wikiPoem(e), 'Read about the poem');
-    a(wikiPoet(e), 'About the poet');
-    parent.appendChild(pp);
+    else if (unnamedAuthor(e)) a(wikiPoem(e), 'Read about the poem');
+    if (hasAuthor(e)) a(wikiPoet(e), 'About the poet');
+    if (pp.childNodes.length) parent.appendChild(pp);
   }
   function kindLabel(e) { return e.k === 'card' ? 'Catalogue card' : e.k === 'bottle' ? 'From a bottle' : 'Poem'; }
   function whereLine(j, e) {
@@ -8652,7 +8657,7 @@ window.DL_SND = (function () {
       out.push(bar); out.push('');
       out.push((i + 1) + '. ' + e.t);
       out.push('   ' + e.p + ', ' + e.yl);
-      out.push('   ' + whereLine(j, e) + ', ' + fmtDate(j.ts) + '.'); out.push('   About the poet: ' + wikiPoet(e)); if (j.note) out.push('   Your note: ' + j.note);
+      out.push('   ' + whereLine(j, e) + ', ' + fmtDate(j.ts) + '.'); if (hasAuthor(e)) out.push('   About the poet: ' + wikiPoet(e)); if (j.note) out.push('   Your note: ' + j.note);
       out.push(''); out.push(e.x); out.push('');
       if (e.n) { out.push('   Note: ' + e.n); out.push(''); }
     });
@@ -8662,7 +8667,7 @@ window.DL_SND = (function () {
       cards.forEach(function (j) {
         var e = byId[j.id];
         out.push('* ' + e.t + ', by ' + e.p + ' (' + e.yl + ')');
-        out.push('  ' + whereLine(j, e) + ', ' + fmtDate(j.ts) + '.'); out.push('  Read about it: ' + wikiPoem(e)); out.push('  About the poet: ' + wikiPoet(e)); if (j.note) out.push('  Your note: ' + j.note);
+        out.push('  ' + whereLine(j, e) + ', ' + fmtDate(j.ts) + '.'); if (!authorless(e)) out.push('  Read about it: ' + wikiPoem(e)); if (hasAuthor(e)) out.push('  About the poet: ' + wikiPoet(e)); if (j.note) out.push('  Your note: ' + j.note);
         if (e.n) out.push('  ' + e.n);
         out.push('');
       });
