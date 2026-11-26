@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
 <title>Drowned Library</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImMiPjxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjI5Ii8+PC9jbGlwUGF0aD4KPGxpbmVhckdyYWRpZW50IGlkPSJ3IiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjNEZBM0I4Ii8+PHN0b3Agb2Zmc2V0PSIwLjQ1IiBzdG9wLWNvbG9yPSIjMUY1RTgwIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMEIyMzQwIi8+PC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIyOSIgZmlsbD0iI0I3RDJFQyIvPgo8ZyBjbGlwLXBhdGg9InVybCgjYykiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzRFN0ZCNiIgc3Ryb2tlLXdpZHRoPSIyLjYiPjxlbGxpcHNlIGN4PSIzMiIgY3k9IjMyIiByeD0iMTQiIHJ5PSIyOSIvPjxlbGxpcHNlIGN4PSIzMiIgY3k9IjMyIiByeD0iMjYiIHJ5PSIyOSIvPjxwYXRoIGQ9Ik0zMiAwdjQwTTAgMTNoNjQiLz48L2c+CjxnIGNsaXAtcGF0aD0idXJsKCNjKSI+PHBhdGggZD0iTS0yIDMwcTgtNSAxNiAwdDE2IDB0MTYgMHQxNiAwVjY2SC0yWiIgZmlsbD0idXJsKCN3KSIvPjxwYXRoIGQ9Ik0tMiAzMHE4LTUgMTYgMHQxNiAwdDE2IDB0MTYgMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQkZFNkVFIiBzdHJva2Utd2lkdGg9IjEuNiIgb3BhY2l0eT0iMC44NSIvPjwvZz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMjkiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzI0NEE2QiIgc3Ryb2tlLXdpZHRoPSIzIi8+CjxnIGZpbGw9IiNEOEYwRjUiIG9wYWNpdHk9IjAuOCI+PGNpcmNsZSBjeD0iMTkiIGN5PSI0MiIgcj0iMi4zIi8+PGNpcmNsZSBjeD0iMjQiIGN5PSI1MSIgcj0iMS42Ii8+PGNpcmNsZSBjeD0iNDYiIGN5PSI0MSIgcj0iMS44Ii8+PGNpcmNsZSBjeD0iNDIiIGN5PSI1MyIgcj0iMS4zIi8+PC9nPgo8ZyB0cmFuc2Zvcm09InJvdGF0ZSgtMTQgMzIgNDcpIj48cmVjdCB4PSIyNiIgeT0iNDMiIHdpZHRoPSIxMyIgaGVpZ2h0PSI5IiByeD0iMS40IiBmaWxsPSIjRThDNDVDIi8+PHJlY3QgeD0iMjYiIHk9IjQzIiB3aWR0aD0iMyIgaGVpZ2h0PSI5IiByeD0iMS4yIiBmaWxsPSIjQjg5MDJGIi8+PHBhdGggZD0iTTMxIDQ3aDZNMzEgNDkuNmg1IiBzdHJva2U9IiM4QTZBMUYiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9nPgo8L3N2Zz4=">
 <meta name="description" content="Sail a drowned globe, drop a line, and raise the poems that were written beneath you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4374,7 +4375,12 @@ window.DL_SND = (function () {
   }
 
   return {
-    init: function () { if (!ctx) { if (!build()) return; } if (ctx.state === 'suspended') ctx.resume(); },
+    ready: function () { return !!ctx && ctx.state === 'running'; },
+    init: function () {
+      var active = !navigator.userActivation || navigator.userActivation.hasBeenActive;
+      if (!ctx) { if (!active || !build()) return; }
+      if (ctx.state === 'suspended' && active) ctx.resume();
+    },
     mute: function (m) { muted = !!m; if (master) master.gain.setTargetAtTime(muted ? 0 : 0.85, ctx.currentTime, 0.1); },
     isMuted: function () { return muted; },
     tick: function (dt) {
@@ -6644,7 +6650,8 @@ window.DL_SND = (function () {
     paint();
     b.addEventListener('click', function () { soundOn = !soundOn; store.set(KEY_SND, soundOn); snd.init(); snd.mute(!soundOn); paint(); });
     var unlock = function () { snd.init(); };
-    window.addEventListener('pointerdown', unlock, { once: true }); window.addEventListener('keydown', unlock, { once: true });
+    var unlockAll2 = function () { unlock(); if (snd.ready()) ['pointerdown', 'keydown', 'touchend', 'click'].forEach(function (n) { window.removeEventListener(n, unlockAll2, true); }); };
+    ['pointerdown', 'keydown', 'touchend', 'click'].forEach(function (n) { window.addEventListener(n, unlockAll2, true); });
   })();
 
   /* ---------- toasts that wait until a sheet is closed ---------- */
@@ -6961,17 +6968,43 @@ window.DL_SND = (function () {
     return { text: forms[(Math.random() * forms.length) | 0], e: e };
   }
   /* a marked place: compass words in the corner, and a book that winks when you are close */
-  /* curious fingers: the console, the locked tiles, the hidden coin */
-  var duckMode = 0, trapN = 0, TRAPS = [
-    ['The Librarian looks over their reading glasses at you', 'That lock is more of a suggestion than a lock. Nonetheless, a rubber duck is on its way.'],
-    ['The Librarian clears their throat', 'You have found the back door. It leads, rather awkwardly, to the front door. Please go around.'],
-    ['A small, polite cough', 'Shortcuts are sold at the shop, which is closed.'],
-    ['Ahoy, curious one', 'The books taste better wet. Off you go.']];
-  function cheatTrap() { var t = TRAPS[trapN % TRAPS.length]; trapN++; duckMode = Math.min(3, duckMode + 2); toast(t[0], t[1], 9000, null, true); if (snd) snd.click(); }
+  /* curious fingers: the console, the locked tiles, the hidden coin. Each attempt gets its own answer from the Librarian. */
+  var duckMode = 0, QUIPS = {
+    unlockAll: ['The Librarian puts down their tea', 'Unlock everything at once? That is less cheating and more a hostile takeover of the shelves. The ducks have been informed.'],
+    godMode: ['A small announcement', 'The position of God is currently theologically complicated and thus hard to grant. The position of Librarian is already filled and has considerably better hours. We will let you know if any openings come up little duck.'],
+    cheat: ['A short, firm sneeze', 'The word “cheat” was looked up in the Library dictionary. It was found between “cheese” and “chess”, and is generally considered the least rewarding of the three.'],
+    cheats: ['Cheats in the plural?', 'One might reasonably be attributed to curiosity. Several suggests a hobby, and whilst hobbies are generally considered healthy, The Librarian would prefer you took up something else. Perhaps origami.'],
+    giveMeEverything: ['Everything is rather a lot', 'The Drowned Library holds a great many things and an enormous amount of water. I will arrange for a sample to be delivered via your nearest tap.'],
+    giveAll: ['“All” has been checked', 'It turned out to be a good deal smaller than expected, and mostly under water.'],
+    unlock: ['The Librarian checks the lock', 'It is locked in the way a cat is locked into being a cat, which is to say very firmly and with no particular hard feelings.'],
+    addPoems: ['A poem about adding poems', 'To add a poem, one must write, a rather peculiar human rite. The Library, in anticipation, Has made some room for your creation. At the menu’s foot, beneath the rest, An email waits to be addressed. Share a a verse, yours or not, these words will fill what land forgot.'],
+    setCasts: ['Not to cast aspersions', 'The sea has been keeping its own accounts for several billion years and is rather reluctant to accept amendments to its records from a mammal with a glowy thing.'],
+    resetProgress: ['Forgetting is a great deal of work', 'If you do wish to start again, there is a button for it in the journal. The Librarian will pretend to be surprised.'],
+    iddqd: ['An older and stranger magic', 'The Librarian smirks, but notes that maybe the only invulnerable thing around here is your willingness to change.'],
+    idkfa: ['A key and an armoury', 'The Library has neither, but the pen has been said to be both mighty and dangerous.'],
+    debug: ['No bugs here', 'There is a spider that lives in the hull and it has been given a library card. But it is formally recognised as an arachnid.'],
+    hack: ['“Hack” is a verb for firewood', 'The Library is made of paper and is currently under water, so it is not especially well placed to be burnt either. Do try the lure.'],
+    noclip: ['The walls are quite solid', 'They are also, as it happens, under several hundred metres of sea, which tends to discourage walking through them. Boats are recommended.'],
+    money: ['Here is a coin', 'It is imaginary, and worth precisely what you paid for it.'],
+    __dl: ['Nothing behind this door', 'Behind this door there is more door, and behind that, water, and behind that, an introverted dolphin who would like to be left alone.'],
+    lock_lure: ['The lure is not in the box', 'It has not been earned yet, and no amount of rattling the lid will change that. The Librarian has put it on top of the fridge, somewhere only patience can reach.'],
+    lock_hat: ['That hat is still on its head', 'Somewhere in the world a landmark is wearing it, and has not yet been asked. Go and ask politely.'],
+    coin: ['A coin with nobody on it', 'The coin is not yet yours to hold. The hidden button has been noticed, and has been found to be hiding rather badly.'],
+    generic: ['The Librarian points to a small but surprisingly judgemental sign:', '‘Please refrain from scripting in the console. Some of us are trying to read.’']
+  }, trapSeen = {};
+  function cheatTrap(kind) {
+    var q = QUIPS[kind] || QUIPS.generic, now = Date.now(); if (trapSeen[kind] && now - trapSeen[kind] < 1500) return q[1]; trapSeen[kind] = now;
+    duckMode = Math.min(3, duckMode + 2); toast(q[0], q[1], 9000, null, true); if (snd) snd.click(); return q[1];
+  }
   (function () {
-    ['unlockAll', 'godMode', 'cheat', 'cheats', 'giveMeEverything', 'giveAll', 'unlock', 'addPoems', 'setCasts', 'resetProgress', 'iddqd'].forEach(function (n) { try { if (!(n in window)) window[n] = function () { cheatTrap(); return 'The Librarian wishes you fair winds, and gently declines.'; }; } catch (e) {} });
-    try { if (!window.__dl) window.__dl = function () { cheatTrap(); return 'Nothing to see here but water.'; }; } catch (e) {}
-    try { console.log('%cAhoy, curious one.', 'font: italic 600 18px Georgia, serif; color: #1B2A52;', '\nYou have found the console. The Librarian waves, and so does the ocean.'); } catch (e) {}
+    /* typing the bare name is enough, no brackets needed, and the code behind it stays out of sight */
+    Object.keys(QUIPS).forEach(function (n) {
+      if (n === 'generic' || n.indexOf('lock_') === 0 || n === 'coin' || n === '__dl') return;
+      var decoy = (function () { return QUIPS[n][1]; }).bind(null);
+      try { if (!(n in window)) Object.defineProperty(window, n, { configurable: true, get: function () { cheatTrap(n); return decoy; }, set: function () {} }); } catch (e) {}
+    });
+    try { if (!window.__dl) window.__dl = (function () { return cheatTrap('__dl'); }).bind(null); } catch (e) {}
+    try { console.log('%cAhoy, curious one.', 'font: italic 600 18px Georgia, serif; color: #1B2A52;', '\nYou have found the console. The Librarian waves, and asks only that you earn the books the long way round. They taste better wet.'); } catch (e) {}
   })();
   var KEY_TR = 'drownedLibrary.trail.v1', trailE = byId[store.get(KEY_TR, '')] || null, winkG = null, trailLast = 0, trailArrived = false;
   var DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
@@ -7272,7 +7305,7 @@ window.DL_SND = (function () {
     toast('The Golden Doubloon', 'It slid from the white whale’s mouth, warm, with a whale stamped on one side. The coin beside the sound button switches its glint on and off, and it makes the poem closest to you wink.', 15000, null, true);
   }
   function paintDoubloon() { var b = $('btn-doubloon'); if (!b) return; b.hidden = !dbl.have; b.setAttribute('aria-pressed', dbl.on ? 'true' : 'false'); b.title = dbl.on ? 'The Golden Doubloon: on' : 'The Golden Doubloon: off'; }
-  (function () { var b = $('btn-doubloon'); if (!b) return; b.addEventListener('click', function () { if (!dbl.have) { cheatTrap(); return; } dbl.on = !dbl.on; store.set(KEY_DB, dbl); paintDoubloon(); snd.click(); }); paintDoubloon(); })();
+  (function () { var b = $('btn-doubloon'); if (!b) return; b.addEventListener('click', function () { if (!dbl.have) { cheatTrap('coin'); return; } dbl.on = !dbl.on; store.set(KEY_DB, dbl); paintDoubloon(); snd.click(); }); paintDoubloon(); })();
   /* silt lifting from the sea floor around the boat */
   var SILT_N = 220, siltPos = new Float32Array(SILT_N * 3), siltG = new THREE.BufferGeometry(), siltSeed = [], siltPts;
   (function () { for (var i = 0; i < SILT_N; i++) siltSeed.push({ a: Math.random() * TAU, r: 1.2 + Math.random() * 9, ph: Math.random(), sp: 0.1 + Math.random() * 0.14 }); siltG.setAttribute('position', new THREE.BufferAttribute(siltPos, 3));
@@ -7806,7 +7839,7 @@ function buildCloset() {
     b.appendChild(tk); b.appendChild(ic); b.appendChild(nm);
     if (!open) { var hn = document.createElement('span'); hn.className = 'hat-hint'; hn.textContent = H.hint; b.appendChild(hn); }
     b.setAttribute('aria-label', open ? H.name + (H.id === hatId ? ', worn' : '') : 'Locked. ' + H.hint);
-    b.addEventListener('click', function () { if (!hatOpen(H)) { cheatTrap(); return; } hatId = H.id; store.set(KEY_H, hatId); applyHat(); buildCloset(); snd.click(); });
+    b.addEventListener('click', function () { if (!hatOpen(H)) { cheatTrap('lock_hat'); return; } hatId = H.id; store.set(KEY_H, hatId); applyHat(); buildCloset(); snd.click(); });
     grid.appendChild(b);
   });
   $('hat-desc').textContent = n + ' of ' + total + ' hats found. Sail to monuments and wonders of the world to find more.';
@@ -7873,7 +7906,7 @@ function buildTackleGrid() {
     else hn.textContent = critText(L).replace(/^./, function (c) { return c.toUpperCase(); }) + ' (' + Math.max(0, (L.lm ? L.lm : L.n) - critLeft(L)) + ' of ' + (L.lm || L.n) + ')';
     if (!L.far) b.appendChild(hn);
     b.setAttribute('aria-label', open ? L.name + (L.id === cur ? ', in use' : '') : L.name + '. Locked. ' + hn.textContent);
-    b.addEventListener('click', function () { if (!lureOpen(L)) { cheatTrap(); return; } lureId = L.id; store.set(KEY_L, lureId); buildLureSelect(); snd.click(); });
+    b.addEventListener('click', function () { if (!lureOpen(L)) { cheatTrap('lock_lure'); return; } lureId = L.id; store.set(KEY_L, lureId); buildLureSelect(); snd.click(); });
     grid.appendChild(b);
   });
   var lh = lureHint(), ld = $('lure-desc'); ld.textContent = lh; ld.hidden = !lh;
@@ -7937,8 +7970,21 @@ $('sub-copy').addEventListener('click', function () {
 if (tamperLog.length) setTimeout(function () {
   var names = { casts: 'cast count', wonders: 'weather log', lureUnlocked: 'tackle box', hatsUnlocked: 'closet', secretHat: 'closet', lights: 'lantern log', landmarks: 'landmark list', doubloon: 'coin purse', mark: 'signature', daily: 'bottle diary', oddments: 'odds and ends', journal: 'journal' }, seen = {}, list = [];
   tamperLog.forEach(function (k) { var n = names[k.replace('drownedLibrary.', '').replace(/\.v\d$/, '')] || 'journal'; if (!seen[n]) { seen[n] = 1; list.push(n); } });
-  toast('Pencil marks in the margins', 'The Librarian found some tidy corrections in your ' + list.join(', ') + ', rubbed them out, and wanted to remind you that we do not doodle on the books', 14000);
+  toast('A brief misunderstanding with history', 'The Librarian found some improvements to reality in your ' + list.join(', ') + ', erased them, and wanted to noted that the past, whilst sometimes disappointing, is not open to editorial suggestions.', 14000);
 }, 2600);
+
+/* a PNG copy of the icon, for browsers that only take pictures (Safari, home-screen shortcuts) */
+(function () {
+  var link = document.querySelector('link[rel="icon"]'); if (!link) return; var img = new Image();
+  img.onload = function () {
+    try {
+      var c = document.createElement('canvas'); c.width = c.height = 180; c.getContext('2d').drawImage(img, 0, 0, 180, 180); var url = c.toDataURL('image/png');
+      var a = document.createElement('link'); a.rel = 'apple-touch-icon'; a.href = url; document.head.appendChild(a);
+      var p = document.createElement('link'); p.rel = 'icon'; p.type = 'image/png'; p.setAttribute('sizes', '180x180'); p.href = url; document.head.appendChild(p);
+    } catch (e) {}
+  };
+  img.src = link.href;
+})();
 
 
   /* ------------------------------------------------------------------
