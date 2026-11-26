@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
 <title>Drowned Library</title>
 <meta name="description" content="Sail a drowned globe, drop a line, and raise the poems that were written beneath you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -449,7 +450,7 @@ body.rest #hud, body.rest #hud * { pointer-events: none !important; }
 .hat.wide .hat-nm { font-size: 0.92rem; }
 .hat.wide .hat-hint { font-size: 0.8rem; }
 
-.trail { margin: 0.55rem 0 0; max-width: 17rem; font-size: 0.9rem; font-style: italic; line-height: 1.3; color: var(--world-ink); text-shadow: var(--halo); }
+.trail { margin: 0.55rem 0 0; font-size: 0.9rem; font-style: italic; line-height: 1.3; color: var(--world-ink); text-shadow: var(--halo); }
 .trail .linkish { margin-left: 0.5rem; font-size: 0.78rem; font-style: normal; opacity: 0.85; color: inherit; pointer-events: auto; }
 .toast-act { margin-top: 0.65rem; font: inherit; font-size: 0.9rem; padding: 0.45rem 0.95rem; border-radius: 999px; border: 0; background: var(--ink); color: var(--paper); cursor: pointer; }
 
@@ -486,6 +487,52 @@ body.rest #hud, body.rest #hud * { pointer-events: none !important; }
 .margin select:focus-visible, #voice-select:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 #voice-wrap { margin-top: 0.9rem; }
 
+/* quick, repeated taps on the game never zoom the page or start a text selection */
+html, body { -webkit-tap-highlight-color: transparent; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+button, a, .joy, #world, .hud, .toast { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.sheet p, .sheet li, .sheet h2, .sheet h3, .sheet dd, .sheet dt, .poem, .poem p, .poem span, input, textarea, select { -webkit-user-select: text; user-select: text; }
+.sheet button { -webkit-user-select: none; user-select: none; }
+
+/* touch: a joystick low and central, with the cast button beside it where the other thumb rests */
+.joy { display: none; }
+@media (pointer: coarse) {
+  .bottom { grid-template-columns: 1fr auto auto 1fr; column-gap: 0.5rem; row-gap: 10px; }
+  .act { display: contents; }
+  .status { grid-column: 1 / -1; grid-row: 1; text-align: center; font-size: 0.95rem; }
+  .weigh-manual { grid-column: 1 / -1; grid-row: 2; }
+  .tension { grid-column: 1 / -1; grid-row: 2; justify-self: center; margin-bottom: 0.8rem; }
+  .joy { display: block; grid-column: 2; grid-row: 3; position: relative; width: 128px; height: 128px; margin: 0 6px 8px 0; touch-action: none; opacity: 0.36; transition: opacity 0.45s ease; }
+  .joy.on { opacity: 0.15; transition: opacity 0.12s ease; }
+  .joy-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--btn-ink); background: radial-gradient(circle, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 70%); }
+  .joy-knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: var(--btn-ink); opacity: 0.6; transform: translate(var(--jx, 0px), var(--jy, 0px)); }
+  .primary#btn-cast { grid-column: 3; grid-row: 3; justify-self: start; align-self: end; margin: 0 0 20px 8px; white-space: nowrap; padding: 0.85rem 1.25rem; font-size: 1.02rem; }
+  .hint { display: none; }
+}
+
+.toast-badge { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 0.7rem); left: 50%; transform: translateX(-50%); margin: 0; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.78rem; font-style: italic; color: var(--world-ink); background: rgba(8, 14, 34, 0.35); text-shadow: var(--halo); pointer-events: none; z-index: 5; }
+
+.pill.coin { padding: 0.28rem 0.5rem; display: inline-grid; place-items: center; background: transparent; }
+.pill.coin[aria-pressed="true"] { background: transparent; }
+.coin svg { width: 26px; height: 26px; display: block; }
+.coin .coin-face { fill: #9AA0AA; } .coin .coin-rim { fill: none; stroke: #6F7682; stroke-width: 1.4; } .coin .coin-whale { fill: #6F7682; }
+.coin[aria-pressed="true"] .coin-face { fill: #E8BE4B; filter: drop-shadow(0 0 5px rgba(232, 190, 75, 0.7)); } .coin[aria-pressed="true"] .coin-rim { stroke: #B8872A; } .coin[aria-pressed="true"] .coin-whale { fill: #9A6A1A; }
+
+/* a bottle's compass: the gold arrow points where to steer, the boat in the middle always faces up */
+.trail { display: flex; align-items: center; gap: 0.7rem; max-width: 19rem; }
+.trail .compass { flex: none; width: 96px; height: 96px; filter: drop-shadow(0 2px 6px rgba(8, 14, 34, 0.35)); }
+.trail .compass svg { width: 100%; height: 100%; display: block; }
+.cmp-ring { fill: rgba(8, 14, 34, 0.4); stroke: rgba(241, 220, 154, 0.7); stroke-width: 2; }
+.cmp-turn { transform-box: view-box; transform-origin: 50% 50%; transition: transform 0.35s ease-out; }
+.cmp-l, .cmp-n { font: 600 11px Georgia, serif; fill: rgba(255, 255, 255, 0.55); text-anchor: middle; font-style: normal; }
+.cmp-n { fill: #F1DC9A; font-size: 13px; }
+.cmp-boat { fill: #fff; opacity: 0.9; }
+.cmp-pointer { fill: #F1DC9A; stroke: #8A6A1F; stroke-width: 1.4; stroke-linejoin: round; }
+.cmp-dot { fill: #8A6A1F; }
+.trail-words { display: flex; flex-direction: column; gap: 0.15rem; align-items: flex-start; font-style: italic; }
+.trail-hint { font-style: normal; font-weight: 600; }
+.trail .linkish { margin-left: 0; margin-top: 0.1rem; }
+
 </style>
 </head>
 <body>
@@ -500,12 +547,21 @@ body.rest #hud, body.rest #hud * { pointer-events: none !important; }
       <p id="place" class="place">Open water</p>
       <p id="region" class="region" hidden></p>
       <p id="coords" class="coords"></p>
-      <p id="trail" class="trail" hidden><span id="trail-text"></span><button id="trail-clear" class="linkish" type="button">Clear</button></p>
+      <div id="trail" class="trail" hidden>
+        <div class="compass" aria-hidden="true"><svg viewBox="0 0 100 100">
+          <circle class="cmp-ring" cx="50" cy="50" r="46"/>
+          <g id="cmp-world" class="cmp-turn"><text x="50" y="17" class="cmp-n">N</text><text x="86" y="54" class="cmp-l">E</text><text x="50" y="92" class="cmp-l">S</text><text x="14" y="54" class="cmp-l">W</text></g>
+          <path class="cmp-boat" d="M50 41 L57 60 L50 56 L43 60 Z"/>
+          <g id="cmp-arrow" class="cmp-turn"><path class="cmp-pointer" d="M50 7 L62 33 L54 30 L54 47 L46 47 L46 30 L38 33 Z"/><circle class="cmp-dot" cx="50" cy="12" r="2.6"/></g>
+        </svg></div>
+        <div class="trail-words"><span id="trail-text"></span><span id="trail-hint" class="trail-hint"></span><button id="trail-clear" class="linkish" type="button">Clear</button></div>
+      </div>
       <p id="below" class="below" hidden></p>
     </div>
     <nav class="tools" aria-label="Site">
       <button id="btn-journal" class="pill" type="button">Journal <span id="journal-count" class="count">0</span></button>
       <button id="btn-globe" class="pill" type="button" aria-pressed="false">Globe</button>
+      <button id="btn-doubloon" class="pill coin" type="button" aria-pressed="true" aria-label="The Golden Doubloon" hidden><svg viewBox="0 0 32 32" aria-hidden="true"><circle class="coin-face" cx="16" cy="16" r="14"/><circle class="coin-rim" cx="16" cy="16" r="11.2"/><path class="coin-whale" d="M6.5 17.2c2.6-5.6 9.4-8 14.8-5.2 1.7.9 3.1 2.2 4 3.7l2.7-2.4-.7 4.6 2.4 1.5-3.5.6c-1.6 3.6-5.2 5.8-9.6 5.5-4.8-.4-8.4-3.7-10.1-8.3Z"/></svg></button>
       <button id="btn-sound" class="pill" type="button" aria-pressed="true">Sound on</button>
       <button id="btn-menu" class="pill" type="button">Menu</button>
     </nav>
@@ -528,10 +584,7 @@ body.rest #hud, body.rest #hud * { pointer-events: none !important; }
   </div>
 
   <footer class="bottom">
-    <div class="pad pad-steer">
-      <button id="t-left" type="button" aria-label="Steer left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button id="t-right" type="button" aria-label="Steer right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
-    </div>
+    <div id="joy" class="joy" aria-hidden="true"><div class="joy-ring"></div><div class="joy-knob"></div></div>
     <div class="act">
       <div id="power" class="tension power" hidden><span id="power-mark" class="tm"></span><em class="tl l">near</em><em class="tl r">far</em></div>
       <div id="tension" class="tension" hidden><span class="tz"></span><span id="tension-mark" class="tm"></span><em class="tl l">resting</em><em class="tl r">pulling</em></div>
@@ -543,13 +596,10 @@ body.rest #hud, body.rest #hud * { pointer-events: none !important; }
       <button id="btn-cast" class="primary" type="button">Cast a line</button>
       <p id="hint" class="hint">Arrow keys or WASD to row. Space to cast.</p>
     </div>
-    <div class="pad pad-throttle">
-      <button id="t-up" type="button" aria-label="Sail forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg></button>
-      <button id="t-down" type="button" aria-label="Back up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></button>
-    </div>
   </footer>
 </div>
 
+<p id="toast-badge" class="toast-badge" hidden></p>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden>
   <p id="toast-title" class="toast-title"></p>
   <p id="toast-text" class="toast-text"></p>
@@ -1043,8 +1093,12 @@ window.DL_MON = (function () {
     return g;
   };
   BL.christ = function (g) {
-    part(g, B(1.1, 0.9, 1.1), K.stone2, 0, 0.45, 0); part(g, Cy(0.2, 0.32, 1.9, 8), K.white, 0, 1.85, 0);
-    part(g, B(2.2, 0.22, 0.24), K.white, 0, 2.55, 0); part(g, Sp(0.2), K.white, 0, 2.95, 0);
+    /* one piece from plinth to crown: the robe runs up through the arms to the neck and head, so nothing hangs in the water */
+    var q = new T.Group();
+    part(q, B(1.4, 0.5, 1.4), K.stone2, 0, 0.25, 0); part(q, B(1.0, 0.5, 1.0), K.stone2, 0, 0.75, 0);
+    part(q, Cy(0.22, 0.4, 1.9, 10), K.white, 0, 1.95, 0);
+    part(q, B(2.3, 0.26, 0.26), K.white, 0, 2.6, 0); part(q, Cy(0.14, 0.2, 0.32, 8), K.white, 0, 2.86, 0); part(q, Sp(0.22), K.white, 0, 3.08, 0);
+    g.add(q);
     return g;
   };
   BL.moai = function (g, r) {
@@ -1370,7 +1424,7 @@ window.DL_MON = (function () {
     ['cntower', 'the CN Tower', 43.64, -79.39, 'tower', 4.2, { h: 4.2, pod: 0.7 }],
     ['chichen', 'El Castillo at Chichén Itzá', 20.68, -88.57, 'steps', 2.4, { n: 8, w: 3.0, lh: 0.26, shr: 0.86, temple: true, ruin: 0.4 }],
     ['elmorro', 'El Morro lighthouse', 23.15, -82.35, 'lighthouse', 3.0, { h: 3.0, fort: true }],
-    ['christ', 'Christ the Redeemer', -22.95, -43.21, 'christ', 3.2, { ruin: 0.35 }],
+    ['christ', 'Christ the Redeemer', -22.95, -43.21, 'christ', 3.4, { ruin: 0.35 }],
     ['machu', 'Machu Picchu', -13.16, -72.55, 'steps', 1.5, { n: 5, w: 3.4, lh: 0.22, shr: 0.84, c: 0xBDB6A4, c2: 0xA8C0A0, ruin: 0.2 }],
     ['moai', 'the moai of Rapa Nui', -27.12, -109.35, 'moai', 2.2, { ruin: 0 }],
     ['obelisco', 'the Obelisco of Buenos Aires', -34.60, -58.38, 'obelisk', 3.8, { h: 3.8, w: 0.4, c: K.white, cap: K.stone2 }],
@@ -3924,6 +3978,39 @@ carries the same salt, the same thyme,
 and neither side can tell it where to blow.`, made);
 })();
 
+/* Two more poems from the starting waters, so every depth has something to find close to where the voyage begins. */
+(function () {
+  var P = window.DL_P;
+  var tr = function (lang, extra) { return 'English rendering from the ' + lang + ', made for this library.' + (extra ? ' ' + extra : ''); };
+  P('irish-wind', 'The wind is fierce tonight', 'an unknown Irish monk', 850, 'c. 9th century', 53.55, -5.65, 'the Irish Sea', `
+Bitter is the wind tonight,
+it tosses the white hair of the sea.
+I do not fear the Irish Sea crossed
+by fierce Vikings from Norway.`, tr('Old Irish', 'A monk wrote it in the margin of a manuscript while the raiders were about.'));
+  P('patrick-spens', 'Sir Patrick Spens', 'a Scottish ballad', 1500, 'c. 15th century', 56.07, -3.45, 'Dunfermline, Scotland', `
+The king sits in Dumferling toune,
+Drinking the blude-reid wine:
+‘O whar will I get guid sailor,
+To sail this schip of mine?’
+
+Up and spak an eldern knicht,
+Sat at the kings richt kne:
+‘Sir Patrick Spence is the best sailor
+That sails upon the se.’
+
+The king has written a braid letter,
+And signd it wi his hand,
+And sent it to Sir Patrick Spence,
+Was walking on the sand.`, 'The first three verses of a ballad about a ship sent to sea in winter.');
+})();
+(function () {
+  var P = window.DL_P;
+  P('moby-pacific', 'The Pacific', 'Herman Melville, from Moby-Dick', 1851, '1851', -34.0, -88.0, 'the Pacific', `
+When gliding by the Bashee isles we emerged at last upon the great South Sea; were it not for other things, I could have greeted my dear Pacific with uncounted thanks, for now the long supplication of my youth was answered; that serene ocean rolled eastwards from me a thousand leagues of blue.
+
+There is, one knows not what sweet mystery about this sea, whose gently awful stirrings seem to speak of some hidden soul beneath; like those fabled undulations of the Ephesian sod over the buried Evangelist St. John. And meet it is, that over these sea-pastures, wide-rolling watery prairies and Potters’ Fields of all four continents, the waves should rise and fall, and ebb and flow unceasingly; for here, millions of mixed shades and shadows, drowned dreams, somnambulisms, reveries; all that we call lives and souls, lie dreaming, dreaming, still; tossing like slumberers in their beds; the ever-rolling waves but made so by their restlessness.`, 'Chapter 111 of Moby-Dick, the first two paragraphs. Only the white whale will give it up.');
+})();
+
 /* What each landmark stood for, in a sentence or two. Written to teach a child something and to make a grown-up who knows the place smile. */
 window.DL_QUIP = {
   liberty: 'A gift from France, who felt America could do with a very large reminder about freedom. She has held the torch up since 1886 without once asking for a rest.',
@@ -4135,7 +4222,7 @@ window.DL_BL = {
    Starts after the first click or key press, as browsers require. */
 window.DL_SND = (function () {
   var ctx = null, master = null, bus = null, dry = null, wet = null, noiseBuf = null, muted = false, A = {};
-  var mood = { night: 0, storm: 0, per: 'day' }, musicT = 2, chordN = 0, pinkBuf = null, brownBuf = null, dropAcc = 0;
+  var musicG = null, musicW = null, mood = { night: 0, storm: 0, per: 'day' }, musicT = 2, chordN = 0, pinkBuf = null, brownBuf = null, dropAcc = 0;
   /* One style per part of the day. Chords are semitones above the root; rest is the quiet between phrases, in seconds. */
   var PROG = {
     dawn: { root: 293.66, pat: 'up', bell: 0.55, gap: 1.0, n: [5, 8], rest: [7, 15], pad: 0.02, vel: 0.045, decay: 3.6, hi: 0.3,
@@ -4169,6 +4256,11 @@ window.DL_SND = (function () {
     var n = pan(node, p); n.connect(dry);
     if (wetAmt) { var w = ctx.createGain(); w.gain.value = wetAmt; n.connect(w); w.connect(wet); }
   }
+  /* the music goes through its own pair of gains, so it can be hushed without touching the sea, the weather or the effects */
+  function routeM(node, wetAmt, p) {
+    var n = pan(node, p); n.connect(musicG);
+    if (wetAmt) { var w = ctx.createGain(); w.gain.value = wetAmt; n.connect(w); w.connect(musicW); }
+  }
   function env(g, t0, a, peak, d) {
     g.gain.cancelScheduledValues(t0); g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
@@ -4186,6 +4278,7 @@ window.DL_SND = (function () {
     var conv = ctx.createConvolver(); conv.buffer = impulse(5, 2.2);
     var wlp = ctx.createBiquadFilter(); wlp.type = 'lowpass'; wlp.frequency.value = 3200;
     wet = ctx.createGain(); wet.gain.value = 0.75; wet.connect(wlp); wlp.connect(conv); conv.connect(bus);
+    musicG = ctx.createGain(); musicG.connect(dry); musicW = ctx.createGain(); musicW.connect(wet);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     var nd = noiseBuf.getChannelData(0); for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
     pinkBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate); brownBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
@@ -4215,7 +4308,7 @@ window.DL_SND = (function () {
   }
 
   /* a soft piano: a few sine partials, a quick felt attack, a long decay, warmed by a low-pass */
-  function pianoNote(f, t0, vel, p, decay) {
+  function pianoNote(f, t0, vel, p, decay, sfx) {
     var g = ctx.createGain(), lp = ctx.createBiquadFilter(), parts = [[1, 1, 1], [2, 0.34, 0.65], [3, 0.16, 0.45], [4.01, 0.07, 0.3]];
     lp.type = 'lowpass'; lp.frequency.value = Math.min(7000, 900 + f * 3 + vel * 5000); lp.Q.value = 0.2;
     parts.forEach(function (q) {
@@ -4223,7 +4316,7 @@ window.DL_SND = (function () {
       pg.gain.setValueAtTime(0.0001, t0); pg.gain.exponentialRampToValueAtTime(Math.max(0.0002, vel * q[1]), t0 + 0.008); pg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.008 + decay * q[2]);
       pg.connect(g); o.start(t0); o.stop(t0 + decay + 0.3);
     });
-    g.connect(lp); route(lp, 0.9, p);
+    g.connect(lp); if (sfx) route(lp, 0.9, p); else routeM(lp, 0.9, p);
   }
   function padChord(freqs, t0, dur, gain) {
     freqs.forEach(function (f, i) {
@@ -4231,7 +4324,7 @@ window.DL_SND = (function () {
       o1.type = 'sine'; o2.type = 'triangle'; o1.frequency.value = f; o2.frequency.value = f * 1.002; lp.type = 'lowpass'; lp.frequency.value = 700;
       var g2 = ctx.createGain(); g2.gain.value = 0.3; o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp);
       g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(gain, t0 + 3.2); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 3);
-      o1.start(t0); o2.start(t0); o1.stop(t0 + dur + 3.5); o2.stop(t0 + dur + 3.5); route(lp, 0.9, (i - 1.5) * 0.25);
+      o1.start(t0); o2.start(t0); o1.stop(t0 + dur + 3.5); o2.stop(t0 + dur + 3.5); routeM(lp, 0.9, (i - 1.5) * 0.25);
     });
   }
   /* a glassy, slightly inharmonic note for dawn and night: music-box and celesta, rather than piano */
@@ -4241,7 +4334,7 @@ window.DL_SND = (function () {
       pg.gain.setValueAtTime(0.0001, t0); pg.gain.exponentialRampToValueAtTime(Math.max(0.0002, vel * q[1]), t0 + 0.004); pg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.004 + decay * q[2]);
       pg.connect(g); o.start(t0); o.stop(t0 + decay + 0.2);
     });
-    route(g, 1.0, p);
+    routeM(g, 1.0, p);
   }
   function phrase() {
     var key = mood.storm > 0.5 ? 'storm' : mood.per, S = PROG[key], chord = S.chords[chordN % S.chords.length], len = chord.length; chordN++;
@@ -4295,6 +4388,24 @@ window.DL_SND = (function () {
       A.drone.gain.setTargetAtTime(0.018 + 0.02 * night + 0.03 * storm, t, 1.5); A.wind.gain.setTargetAtTime(0.01 + 0.01 * night + 0.1 * storm, t, 1.5);
       A.wash.gain.setTargetAtTime(0.07 + 0.06 * storm, t, 1.5); A.rainBed.gain.setTargetAtTime(0.34 * storm, t, 1.0); A.rainBody.gain.setTargetAtTime(0.13 * storm, t, 1.5);
     },
+    duck: function (k) { if (!ctx) return; var t = ctx.currentTime, v = 1 - Math.max(0, Math.min(1, k)); musicG.gain.setTargetAtTime(v, t, 2.2); musicW.gain.setTargetAtTime(v, t, 2.2); },
+    rumble: function (k) {
+      if (!ok()) return; k = k == null ? 1 : k;
+      burst(95, 'lowpass', 0.7, 0.16 + 0.26 * k, 5.5 + 3 * k, 1.8, 0.6, 38); tone(34 + 6 * k, 0.07 + 0.1 * k, 1.2, 4.5 + 2 * k, 0.5); tone(51, 0.04 * k, 2, 5, 0.5);
+    },
+    moby: function (k) {
+      if (!ok()) return; k = k == null ? 1 : Math.max(0.3, Math.min(1, k));
+      [0, 3.6].forEach(function (off, n) {
+        var t0 = ctx.currentTime + off, lp = ctx.createBiquadFilter(), g = ctx.createGain(), v = ctx.createOscillator(), vg = ctx.createGain(), base = n ? 40 : 47;
+        lp.type = 'lowpass'; lp.frequency.value = 420; lp.Q.value = 1.4; v.frequency.value = 3.1; vg.gain.value = 3; v.connect(vg);
+        [[1, 0.2], [2, 0.14], [3, 0.08], [4.01, 0.045]].forEach(function (p) {
+          var o = ctx.createOscillator(), og = ctx.createGain(); o.type = 'sine'; og.gain.value = p[1] * k;
+          o.frequency.setValueAtTime(base * p[0], t0); o.frequency.exponentialRampToValueAtTime(base * 2.1 * p[0], t0 + 3); o.frequency.exponentialRampToValueAtTime(base * 0.72 * p[0], t0 + 9.5);
+          vg.connect(o.frequency); o.connect(og); og.connect(lp); o.start(t0); o.stop(t0 + 10.5);
+        });
+        v.start(t0); v.stop(t0 + 10.5); lp.connect(g); env(g, t0, 2.4, 1, 7.5); route(g, 0.95);
+      });
+    },
     chime: function () { if (!ok()) return; [[1, 0.09, 2.2], [2.76, 0.05, 1.4], [5.4, 0.03, 0.9], [8.93, 0.012, 0.5]].forEach(function (p) { tone(880 * p[0], p[1], 0.006, p[2], 0.7); }); },
     scratch: function () {
       if (!ok()) return;
@@ -4311,7 +4422,7 @@ window.DL_SND = (function () {
     thud: function () { if (!ok()) return; tone(95, 0.12, 0.005, 0.32, 0.25, 'sine', 55); },
     sting: function () {
       if (!ok()) return; var t0 = ctx.currentTime + 0.02;
-      [523.25, 659.25, 783.99, 987.77, 1174.66].forEach(function (f, i) { pianoNote(f, t0 + i * 0.16, 0.07, (i - 2) * 0.2, 3.2); });
+      [523.25, 659.25, 783.99, 987.77, 1174.66].forEach(function (f, i) { pianoNote(f, t0 + i * 0.16, 0.07, (i - 2) * 0.2, 3.2, true); });
     },
     thunder: function (k) {
       if (!ok()) return; k = k == null ? 1 : Math.max(0.2, Math.min(1, k)); var far = 1 - k;
@@ -4362,20 +4473,41 @@ window.DL_SND = (function () {
   /* ------------------------------------------------------------------
      Storage: the journal lives in this browser only.
      ------------------------------------------------------------------ */
+  /* The saved unlocks are signed with a small seal. Edit them by hand and the Librarian notices, rubs your pencil marks out,
+     and leaves a note. Only what was edited is put back, nothing else is touched. */
+  var SEAL_KEY = 'drownedLibrary.seal.v1', SEAL_SALT = 'ink-and-brine-' + 'uat3';
+  var SEALED = ['casts', 'wonders', 'lureUnlocked', 'hatsUnlocked', 'secretHat', 'lights', 'landmarks', 'doubloon', 'mark', 'daily', 'oddments'].map(function (n) { return 'drownedLibrary.' + n + (n === 'lureUnlocked' ? '.v2' : '.v1'); });
+  function h53(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57, i, ch;
+    for (i = 0; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  function sealMap() { try { var m = JSON.parse(localStorage.getItem(SEAL_KEY) || '{}'); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; } }
   var store = {
     get: function (k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-    set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
-    del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+    set: function (k, v) {
+      try { var raw = JSON.stringify(v); localStorage.setItem(k, raw); if (SEALED.indexOf(k) >= 0) { var m = sealMap(); m[k] = h53(k + '|' + raw + '|' + SEAL_SALT); localStorage.setItem(SEAL_KEY, JSON.stringify(m)); } return true; } catch (e) { return false; }
+    },
+    del: function (k) { try { localStorage.removeItem(k); if (SEALED.indexOf(k) >= 0) { var m = sealMap(); delete m[k]; localStorage.setItem(SEAL_KEY, JSON.stringify(m)); } } catch (e) {} }
   };
+  function signEntry(id, ts) { return h53(id + '|' + ts + '|' + SEAL_SALT); }
+  var tamperLog = [];
   /* Fresh start for this build: anything saved by earlier visits is cleared once, then progress is kept as normal.
      To give everyone a fresh start again, change the build name below. */
   (function () {
     try {
-      var BUILD = 'uat-2';
+      var BUILD = 'uat-3';
       if (localStorage.getItem('drownedLibrary.build') !== BUILD) {
         var ks = [], i, k; for (i = 0; i < localStorage.length; i++) { k = localStorage.key(i); if (k && k.indexOf('drownedLibrary.') === 0) ks.push(k); }
         ks.forEach(function (x) { localStorage.removeItem(x); }); localStorage.setItem('drownedLibrary.build', BUILD);
       }
+      var seals = sealMap();
+      SEALED.forEach(function (k) {
+        var raw = localStorage.getItem(k); if (raw == null) return;
+        if (seals[k] !== h53(k + '|' + raw + '|' + SEAL_SALT)) { tamperLog.push(k); localStorage.removeItem(k); delete seals[k]; }
+      });
+      localStorage.setItem(SEAL_KEY, JSON.stringify(seals));
     } catch (e) {}
   })();
   var KEY_J = 'drownedLibrary.journal.v1', KEY_O = 'drownedLibrary.oddments.v1', KEY_S = 'drownedLibrary.story.v1', KEY_B = 'drownedLibrary.boat.v1';
@@ -4385,7 +4517,9 @@ window.DL_SND = (function () {
   LIB.forEach(function (e) { byId[e.id] = e; });
   var journal = store.get(KEY_J, []);
   if (!Array.isArray(journal)) journal = [];
-  journal = journal.filter(function (j) { return j && byId[j.id]; });
+  var jBefore = journal.length;
+  journal = journal.filter(function (j) { return j && byId[j.id] && j.sg === signEntry(j.id, j.ts); });
+  if (journal.length < jBefore) tamperLog.push('journal');
   var caught = {};
   journal.forEach(function (j) { caught[j.id] = true; });
   var oddments = store.get(KEY_O, {});
@@ -4431,7 +4565,7 @@ window.DL_SND = (function () {
     e.df = depthOfYear(e.y);
     if (e.k !== 'bottle') { e.q = ll2v(e.la, e.lo); e.short = e.pl.split(',')[0]; }
   });
-  var PLACED = LIB.filter(function (e) { return e.q; });
+  var PLACED = LIB.filter(function (e) { return e.q && e.id !== 'moby-pacific'; });
   var BOTTLES = LIB.filter(function (e) { return e.k === 'bottle'; });
 
   /* ------------------------------------------------------------------
@@ -5577,9 +5711,14 @@ window.DL_SND = (function () {
   ui.scrim.addEventListener('click', function () { if (modal && modal !== 'dlg-story') closeSheet(); });
   Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.addEventListener('click', function () { closeSheet(); }); });
 
+  /* the game surface never selects text or zooms on a double tap, so tapping fast is safe */
+  document.addEventListener('selectstart', function (ev) { var t = ev.target; if (t && t.nodeType === 3) t = t.parentElement; if (t && t.closest && t.closest('.sheet, input, textarea, select, .poem')) return; ev.preventDefault(); });
+  document.addEventListener('dblclick', function (ev) { if (!(ev.target && ev.target.closest && ev.target.closest('.sheet'))) ev.preventDefault(); });
+  document.addEventListener('gesturestart', function (ev) { if (!(ev.target && ev.target.closest && ev.target.closest('.sheet'))) ev.preventDefault(); });
   var toastTimer = 0, toastQ = [], toastCur = null, toastPaused = false;
   function toastMore() {
     var n = toastQ.length; $('toast-more').textContent = n ? n + ' more' : ''; $('toast-next').textContent = n ? 'Next' : 'Dismiss';
+    var bd = $('toast-badge'); if (bd) { bd.hidden = !(toastPaused && n); bd.textContent = n + (n === 1 ? ' note waiting' : ' notes waiting'); }
   }
   function showNextToast() {
     clearTimeout(toastTimer); var t = toastQ.shift();
@@ -5597,8 +5736,8 @@ window.DL_SND = (function () {
     toastQ.push(t); if (toastQ.length > 8) toastQ.shift();
     if (!toastCur && !toastPaused) showNextToast(); else toastMore();
   }
-  function hideToast() { clearTimeout(toastTimer); ui.toast.hidden = true; toastCur = null; toastPaused = true; }
-  function resumeToasts() { toastPaused = false; if (!toastCur && toastQ.length) showNextToast(); }
+  function hideToast() { clearTimeout(toastTimer); ui.toast.hidden = true; if (toastCur) toastQ.unshift(toastCur); toastCur = null; toastPaused = true; toastMore(); }
+  function resumeToasts() { toastPaused = false; toastMore(); if (!toastCur && toastQ.length) showNextToast(); }
   $('toast-next').addEventListener('click', showNextToast);
 
   function fillPoem(el, text) {
@@ -5636,7 +5775,8 @@ window.DL_SND = (function () {
   function record(e, depth, src) {
     if (caught[e.id]) return false;
     var ll = v2ll(catchAt || p);
-    journal.push({ id: e.id, d: Math.round(depth), la: +ll.lat.toFixed(2), lo: +ll.lon.toFixed(2), ts: Date.now(), src: src || '' });
+    journal.push({ id: e.id, d: Math.round(depth), la: +ll.lat.toFixed(2), lo: +ll.lon.toFixed(2), ts: Date.now(), src: src || '', sg: 0 });
+    journal[journal.length - 1].sg = signEntry(e.id, journal[journal.length - 1].ts);
     caught[e.id] = true; store.set(KEY_J, journal); updateCount(); checkUnlocks(true); refreshLit(true);
     return true;
   }
@@ -5765,6 +5905,8 @@ window.DL_SND = (function () {
   }
   function rollCatch(d) {
     scanNear();
+    if (duckMode > 0) { duckMode--; return { kind: 'junk', j: ['A rubber duck', 'It bobs there looking extremely pleased with itself. A small tag reads, “Compliments of the Librarian.”'], hint: '' }; }
+    if (moby.on && (moby.s === 'greet' || moby.s === 'surfaced' || (fishAt || p).dot(moby.pos) > Math.cos(18 / R))) { fails = 0; return { kind: 'lit', e: byId['moby-pacific'] }; }
     if (curLure().far) {
       var pool = PLACED.filter(function (e) { return e.k !== 'bottle'; }), tot = 0, pi, px;
       pool.forEach(function (e) { tot += caught[e.id] ? 0.35 : 1; }); px = Math.random() * tot;
@@ -5772,11 +5914,13 @@ window.DL_SND = (function () {
       fails = 0; return { kind: 'lit', e: pool[pi] };
     }
     if (castCount < 4) {
-      var gp = near.filter(function (n) { return !caught[n.e.id]; }), gt = gp.filter(function (n) { return n.e.x; }), gu = gt.length ? gt : gp;
+      /* the first casts teach the depth scale, so the poem raised belongs to the depth chosen */
+      var gu = near.filter(function (n) { return !caught[n.e.id]; });
       if (gu.length) {
-        var gs = 0, gx, gi = 0; gu.forEach(function (n) { gs += n.w; }); gx = Math.random() * gs;
-        if (castCount === 0) { gu.forEach(function (n, k) { if (n.w > gu[gi].w) gi = k; }); }
-        else for (gi = 0; gi < gu.length - 1; gi++) { gx -= gu[gi].w; if (gx <= 0) break; }
+        gu.forEach(function (n) { n.sc = Math.abs(d - n.e.df) + (n.e.x ? 0 : 8) + 6 * (1 - Math.min(1, n.w)); });
+        var gi = 0, gx, gs = 0; gu.forEach(function (n) { n.pr = Math.exp(-n.sc / 9); gs += n.pr; }); gx = Math.random() * gs;
+        if (castCount === 0) { gu.forEach(function (n, k) { if (n.sc < gu[gi].sc) gi = k; }); }
+        else for (gi = 0; gi < gu.length - 1; gi++) { gx -= gu[gi].pr; if (gx <= 0) break; }
         fails = 0; return { kind: 'lit', e: gu[gi].e };
       }
       return bottleCatch();
@@ -6057,7 +6201,7 @@ window.DL_SND = (function () {
     x.classList.remove('drawn'); void x.offsetWidth; x.classList.add('drawing'); if (snd) snd.scratch();
     setTimeout(function () { markDone = true; store.set(KEY_X, true); x.classList.remove('drawing'); x.classList.add('drawn'); x.disabled = false; }, reduce ? 50 : 1200);
     setTimeout(function () { go.disabled = false; bk.disabled = false; markBusy = false; closeSheet(true); ui.cast.focus();
-      if (castCount === 0) setTimeout(function () { toast('Try casting a line', 'Press Space or the Cast button, choose how far to throw, then how deep. Your first cast will raise the nearest poem, so you can see how it works.', 14000, null, true); ui.cast.classList.add('pulse'); }, 1300);
+      if (castCount === 0) setTimeout(function () { toast('Try casting a line', 'Press Space or the Cast button, choose how far to throw, then how deep. Your first cast will raise a poem from the depth you choose, so you can see how it works.', 14000, null, true); ui.cast.classList.add('pulse'); }, 1300);
     }, reduce ? 400 : 1800);
   });
   $('story-x').addEventListener('click', function () { if (markDone && !markBusy && typeof unlockSecretHat === 'function') unlockSecretHat(); });
@@ -6168,14 +6312,23 @@ window.DL_SND = (function () {
   });
   window.addEventListener('keyup', function (ev) { if (KEYMAP[ev.code]) key[KEYMAP[ev.code]] = false; if (ev.code === 'Space') { var wasFight = fish.state === 'fight'; reelUp(); if (wasFight) ev.preventDefault(); } });
   window.addEventListener('blur', function () { key.up = key.down = key.left = key.right = false; reeling = false; });
-  [['t-left', 'left'], ['t-right', 'right'], ['t-up', 'up'], ['t-down', 'down']].forEach(function (pr) {
-    var b = $(pr[0]), k = pr[1];
-    b.addEventListener('pointerdown', function (ev) { ev.preventDefault(); try { b.setPointerCapture(ev.pointerId); } catch (e) {} key[k] = true; });
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (n) { b.addEventListener(n, function () { key[k] = false; }); });
-    b.addEventListener('keydown', function (ev) { if (ev.code === 'Space' || ev.code === 'Enter') key[k] = true; });
-    b.addEventListener('keyup', function (ev) { if (ev.code === 'Space' || ev.code === 'Enter') key[k] = false; });
-    b.addEventListener('contextmenu', function (ev) { ev.preventDefault(); });
-  });
+  /* the steering wheel for touch screens: one soft circle under the thumb. It fades while it is used, so steering feels like a flow rather than a series of presses. */
+  var joy = { x: 0, y: 0 };
+  (function () {
+    var el = $('joy'); if (!el) return; var pid = null, cx = 0, cy = 0, RAD = 50;
+    function setv(dx, dy) {
+      var l = Math.sqrt(dx * dx + dy * dy), s = l > RAD ? RAD / l : 1; dx *= s; dy *= s;
+      el.style.setProperty('--jx', dx + 'px'); el.style.setProperty('--jy', dy + 'px');
+      var nx = dx / RAD, ny = -dy / RAD, m = Math.sqrt(nx * nx + ny * ny);
+      if (m < 0.16) { joy.x = joy.y = 0; } else { var k = (m - 0.16) / 0.84; joy.x = nx / m * k; joy.y = ny / m * k; }
+      key.up = joy.y > 0.2; key.down = joy.y < -0.2; key.left = joy.x < -0.2; key.right = joy.x > 0.2;
+    }
+    el.addEventListener('pointerdown', function (ev) { ev.preventDefault(); pid = ev.pointerId; try { el.setPointerCapture(pid); } catch (e) {} var r = el.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.top + r.height / 2; el.classList.add('on'); setv(ev.clientX - cx, ev.clientY - cy); });
+    el.addEventListener('pointermove', function (ev) { if (ev.pointerId === pid) setv(ev.clientX - cx, ev.clientY - cy); });
+    function end(ev) { if (ev.pointerId !== pid) return; pid = null; el.classList.remove('on'); el.style.setProperty('--jx', '0px'); el.style.setProperty('--jy', '0px'); joy.x = joy.y = 0; key.up = key.down = key.left = key.right = false; }
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (n) { el.addEventListener(n, end); });
+    el.addEventListener('contextmenu', function (ev) { ev.preventDefault(); });
+  })();
 
   /* ------------------------------------------------------------------
      Frame
@@ -6204,10 +6357,11 @@ window.DL_SND = (function () {
 
   function stepBoat(dt) {
     var canSail = !modal && !veilBusy && fish.state === 'idle' && zoomTarget < 0.5;
-    var thr = canSail ? (key.up ? 1 : 0) - (key.down ? 1 : 0) : 0, st = canSail ? (key.right ? 1 : 0) - (key.left ? 1 : 0) : 0;
+    var jAct = joy.x !== 0 || joy.y !== 0;
+    var thr = canSail ? (jAct ? joy.y : (key.up ? 1 : 0) - (key.down ? 1 : 0)) : 0, st = canSail ? (jAct ? joy.x : (key.right ? 1 : 0) - (key.left ? 1 : 0)) : 0;
     if (rest.on && canSail) st = 0;
     var wind = (storm.k > 0.5 && canSail) ? 2 : 1, pull = (wind > 1 ? 1 : 0.6 + 0.4 * Math.max(0, Math.sin(rowPh))) * wind;
-    if (thr > 0) boat.v += 3.2 * pull * dt; else if (thr < 0) boat.v -= 2.2 * pull * dt; else boat.v *= Math.pow(0.55, dt);
+    if (thr > 0) boat.v += 3.2 * pull * dt * thr; else if (thr < 0) boat.v -= 2.2 * pull * dt * -thr; else boat.v *= Math.pow(0.55, dt);
     boat.v *= Math.pow(0.85, dt);
     if (fish.state !== 'idle') boat.v *= Math.pow(0.02, dt);
     boat.v = clamp(boat.v, -2, 6 * wind);
@@ -6807,36 +6961,59 @@ window.DL_SND = (function () {
     return { text: forms[(Math.random() * forms.length) | 0], e: e };
   }
   /* a marked place: compass words in the corner, and a book that winks when you are close */
+  /* curious fingers: the console, the locked tiles, the hidden coin */
+  var duckMode = 0, trapN = 0, TRAPS = [
+    ['Nice try', 'That lock is more of a suggestion than a lock. The Librarian saw you reach for it, and a rubber duck is on its way.'],
+    ['The Librarian clears their throat', 'You have found the back door. It leads, rather awkwardly, to the front door. Please go round.'],
+    ['A small, polite cough', 'Everything in the box is earned by sailing, fishing or reading. Shortcuts are sold at the shop, which is closed.'],
+    ['Ahoy, curious one', 'The books taste better wet. Off you go.']];
+  function cheatTrap() { var t = TRAPS[trapN % TRAPS.length]; trapN++; duckMode = Math.min(3, duckMode + 2); toast(t[0], t[1], 9000, null, true); if (snd) snd.click(); }
+  (function () {
+    ['unlockAll', 'godMode', 'cheat', 'cheats', 'giveMeEverything', 'giveAll', 'unlock', 'addPoems', 'setCasts', 'resetProgress', 'iddqd'].forEach(function (n) { try { if (!(n in window)) window[n] = function () { cheatTrap(); return 'The Librarian wishes you fair winds, and gently declines.'; }; } catch (e) {} });
+    try { if (!window.__dl) window.__dl = function () { cheatTrap(); return 'Nothing to see here but water.'; }; } catch (e) {}
+    try { console.log('%cAhoy, curious one.', 'font: italic 600 18px Georgia, serif; color: #1B2A52;', '\nYou have found the console. The Librarian waves, and asks only that you earn the books the long way round. They taste better wet.'); } catch (e) {}
+  })();
   var KEY_TR = 'drownedLibrary.trail.v1', trailE = byId[store.get(KEY_TR, '')] || null, winkG = null, trailLast = 0, trailArrived = false;
   var DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
   function setTrail(e) { trailE = e; trailArrived = false; trailLast = 0; store.set(KEY_TR, e ? e.id : ''); if (!e) removeWink(); updateTrail(); }
   function removeWink() { if (!winkG) return; scene.remove(winkG); winkG.traverse(function (n) { if (n.geometry) n.geometry.dispose(); if (n.material) n.material.dispose(); }); winkG = null; }
-  function buildWink() {
-    var g = new THREE.Group(), q = trailE.q, rad = R - depthOf(elevAt(trailE.la, trailE.lo)) + 0.03;
+  var dblTarget = null, dblT = 0;
+  function buildWink(e) {
+    var g = new THREE.Group(), q = e.q, rad = R - depthOf(elevAt(e.la, e.lo)) + 0.03; g.userData.eid = e.id;
     var cover = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.12, 0.48), new THREE.MeshStandardMaterial({ color: 0x8B5E34, roughness: 0.8, emissive: 0x3A2209, emissiveIntensity: 0.5 })); g.add(cover);
     var pages = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 0.44), new THREE.MeshStandardMaterial({ color: 0xE9DFC4, roughness: 0.9, emissive: 0x5A4A28, emissiveIntensity: 0.4 })); pages.position.set(0.02, 0, 0.005); g.add(pages);
     var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFFE9A8, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })); sp.position.y = 0.2; g.add(sp); g.userData.sp = sp;
     g.position.copy(q).multiplyScalar(rad); _qa.setFromUnitVectors(_Y, q); _qb.setFromAxisAngle(_Y, 0.7); _qa.multiply(_qb); g.quaternion.copy(_qa); scene.add(g); winkG = g;
   }
   function stepTrail(dt, t) {
-    if (!trailE) return;
-    if (caught[trailE.id]) { setTrail(null); return; }
-    var d = Math.acos(clamp(p.dot(trailE.q), -1, 1)) * R;
+    dblT -= dt; if (dblT <= 0) { dblT = 1.2; dblTarget = (dbl.have && dbl.on) ? nearestUnraised() : null; }
+    var tg = trailE || dblTarget;
+    if (!tg) { if (winkG) removeWink(); return; }
+    if (caught[tg.id]) { if (tg === trailE) setTrail(null); else { dblTarget = null; if (winkG) removeWink(); } return; }
+    if (winkG && winkG.userData.eid !== tg.id) removeWink();
+    var d = Math.acos(clamp(p.dot(tg.q), -1, 1)) * R;
     if (d < 24) {
-      if (!winkG) buildWink();
+      if (!winkG) buildWink(tg);
       var flash = Math.pow(Math.max(0, Math.sin(t * 1.9)), 24), near = 1 - clamp((d - 3) / 21, 0, 1);
       winkG.userData.sp.material.opacity = (0.12 + 0.88 * flash) * (0.35 + 0.65 * near); winkG.userData.sp.scale.setScalar(0.55 + 1.5 * flash);
     } else if (winkG) removeWink();
-    if (!trailArrived && d < 3) { trailArrived = true; toast('You are over it', 'A book lies beneath the boat. Cast a line and see.', 6000); snd.chime(); }
+    if (tg === trailE && !trailArrived && d < 3) { trailArrived = true; toast('You are over it', 'A book lies beneath the boat. Cast a line and see.', 6000); snd.chime(); }
   }
+  var cmpW = 0, cmpA = 0, _cm1 = new V3(), _cm2 = new V3(), _cm3 = new V3();
+  function turnTo(cur, target) { return cur + (((target - cur) % 360 + 540) % 360 - 180); }
   function updateTrail() {
     var el = $('trail'); if (!trailE || caught[trailE.id]) { if (el && !el.hidden) el.hidden = true; return; }
-    var now = performance.now(); if (now - trailLast < 250 && !el.hidden) return; trailLast = now;
-    var ll = v2ll(p), d = Math.acos(clamp(p.dot(trailE.q), -1, 1)), du = d * R, f1 = ll.lat * D2R, f2 = trailE.la * D2R, dl = (trailE.lo - ll.lon) * D2R;
-    var brg = (Math.atan2(Math.sin(dl) * Math.cos(f2), Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dl)) * R2D + 360) % 360, km = d * 6371;
-    var kmTxt = (km < 1000 ? Math.round(km / 10) * 10 : Math.round(km / 100) * 100).toLocaleString('en');
-    $('trail-text').textContent = 'Marked: off ' + trailE.short + '. ' + (du < 3 ? 'You are over it. Cast a line.' : du < 24 ? 'Very close now. Look beneath the water.' : 'Head ' + DIRS[Math.round(brg / 45) % 8] + ', about ' + kmTxt + ' km.');
-    el.hidden = false;
+    var now = performance.now(); if (now - trailLast < 120 && !el.hidden) return; trailLast = now;
+    _cm1.set(0, 1, 0).addScaledVector(p, -p.y); if (_cm1.lengthSq() < 1e-8) return; _cm1.normalize(); _cm2.crossVectors(_cm1, p).normalize();
+    var hb = Math.atan2(f.dot(_cm2), f.dot(_cm1)) * R2D;
+    _cm3.copy(trailE.q).addScaledVector(p, -trailE.q.dot(p)); var tb = _cm3.lengthSq() > 1e-10 ? Math.atan2(_cm3.normalize().dot(_cm2), _cm3.dot(_cm1)) * R2D : hb;
+    var rel = ((tb - hb) % 360 + 540) % 360 - 180, du = Math.acos(clamp(p.dot(trailE.q), -1, 1)) * R, ar = Math.abs(rel);
+    cmpW = turnTo(cmpW, -hb); cmpA = turnTo(cmpA, rel);
+    $('cmp-world').style.transform = 'rotate(' + cmpW + 'deg)'; $('cmp-arrow').style.transform = 'rotate(' + cmpA + 'deg)';
+    var hint = du < 3 ? 'Right on top of it!' : ar < 15 ? 'Straight ahead. Keep going!' : ar < 60 ? (rel > 0 ? 'A little to the right' : 'A little to the left') : ar < 135 ? (rel > 0 ? 'Turn right' : 'Turn left') : 'Turn all the way around';
+    var near = du < 3 ? 'Cast a line and see.' : du < 24 ? 'Very close now. Look beneath the water.' : du < 60 ? 'Getting closer.' : du < 150 ? 'A fair way to go.' : 'Quite far away.';
+    $('trail-text').textContent = 'A book off ' + trailE.short + '.'; $('trail-hint').textContent = hint; $('trail-text').title = near;
+    el.hidden = false; el.setAttribute('aria-label', 'A marked book off ' + trailE.short + '. ' + hint + ' ' + near);
   }
   $('trail-clear').addEventListener('click', function () { setTrail(null); });
   var noteT = 120 + Math.random() * 180;
@@ -6855,7 +7032,7 @@ window.DL_SND = (function () {
       else if (d < 2.4 && canEvent()) {
         scene.remove(n.g); notes.splice(i, 1); wonders.notes++; store.set(KEY_W, wonders); snd.chime();
         var nt = anglerNote();
-        toast('A note in a bottle', nt.text, nt.e ? 15000 : 11000, nt.e ? { label: 'Mark this location on your map', fn: function () { setTrail(nt.e); toast('Location marked', 'Off ' + nt.e.short + '. The compass directions are in the top left, and the spot is on your journal map.', 6500); } } : null);
+        toast('A note in a bottle', nt.text, nt.e ? 15000 : 11000, nt.e ? { label: 'Mark this location on your map', fn: function () { setTrail(nt.e); toast('Location marked', 'Off ' + nt.e.short + '. A little compass is in the top left, so follow the gold arrow. The spot is on your journal map too.', 6500); } } : null);
       }
     }
   }
@@ -6964,6 +7141,7 @@ window.DL_SND = (function () {
     });
     S = wsp[7]; r = wradius(7 / WNL);
     wEyes.forEach(function (m) { m.position.copy(S.c).addScaledVector(S.r, m.userData.sd * r * 0.9).addScaledVector(S.u, -0.12 * r); });
+    if (moby.on) updateMobyBits();
   }
   var spout = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xE8F4F8, transparent: true, opacity: 0, depthWrite: false, fog: false })); spout.visible = false; scene.add(spout);
   var whale = { ride: false, target: null, on: false, pos: new V3(), hdg: new V3(), age: 0, seen: false, spoutT: 3, t: 200 + Math.random() * 300 };
@@ -6973,6 +7151,7 @@ window.DL_SND = (function () {
   }
   function endRide(title, text) { whale.ride = false; whale.target = null; whaleOnTop = 0; rideT = 0; if (title) toast(title, text || '', 6500); }
   function stepWhale(dt, t) {
+    if (moby.s !== 'idle') { whale.on = false; return; }
     if (!whale.on) {
       uWhaleK.value = Math.max(0, uWhaleK.value - dt);
       if (canEvent()) whale.t -= dt;
@@ -7019,6 +7198,144 @@ window.DL_SND = (function () {
     if (whale.spoutT <= 0 && y < 2.6 && d < 34 && zoomLin < 0.3) { whale.spoutT = 12 + Math.random() * 6; spout.userData.life = 1.8; _c1.copy(whale.pos).multiplyScalar(R + 0.3 + seaAt(whale.pos)); spout.position.copy(_c1).addScaledVector(whale.pos, 0.2); ring(whale.pos, 0.8, 1.6, 0.5, 4); }
     if (spout.userData.life > 0) { spout.userData.life -= dt; var s = Math.max(0, spout.userData.life / 1.8); spout.visible = true; spout.scale.set(0.9, 2.6 * (1.2 - s * 0.6), 1); spout.material.opacity = 0.6 * Math.sin(Math.PI * (1 - s)); if (spout.userData.life <= 0) spout.visible = false; }
     if (!whale.ride && (p.dot(whale.pos) < Math.cos(75 / R) || whale.age > 150)) { whale.on = false; whaleMesh.visible = false; whale.t = 300 + Math.random() * 360; }
+  }
+
+  /* ---------- the white whale: off the coast of South America, in the Pacific. Rest there, in the quiet, for 135 seconds. ---------- */
+  var MZ = ll2v(-34, -88), MZR = 10, MARI = ll2v(11.37, 142.59), MSCALE = 4.6;
+  var KEY_DB = 'drownedLibrary.doubloon.v1', dbl = store.get(KEY_DB, { have: false, on: true });
+  if (!dbl || typeof dbl !== 'object') dbl = { have: false, on: true };
+  var wColN = new Float32Array(wCol), mScars = [], mJaw, mMouth, _mo1 = new V3(), _mo2 = new V3(), _mo3 = new V3(), _mo4 = new V3(), mLastDuck = -1;
+  var moby = { s: 'idle', rest: 0, t: 0, pos: new V3(), hdg: new V3(), y: 40, pitch: 0, jaw: 0, speed: 0, cool: 0, surfT: 0, siltK: 0, on: false, stage: 0, callT: 0, duckT: 0, said: false, rings: 0 };
+  (function () {
+    var sm = new THREE.MeshStandardMaterial({ color: 0x6E7A86, roughness: 0.8 }), g = new THREE.SphereGeometry(1, 12, 8);
+    [-1, 1].forEach(function (sd) { [0, 1].forEach(function (k) { var m = new THREE.Mesh(g, sm); m.userData.sd = sd; m.userData.k = k; m.scale.set(0.05, 0.075, 0.95); m.visible = false; m.frustumCulled = false; whaleMesh.add(m); mScars.push(m); }); });
+    mJaw = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), new THREE.MeshStandardMaterial({ color: 0xF4F6F7, roughness: 0.5 })); mJaw.visible = false; mJaw.frustumCulled = false; whaleMesh.add(mJaw);
+    mMouth = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 10), new THREE.MeshStandardMaterial({ color: 0x5A2028, roughness: 0.8 })); mMouth.visible = false; mMouth.frustumCulled = false; whaleMesh.add(mMouth);
+  })();
+  function skinMoby(on) {
+    for (var i = 0; i < wCol.length; i++) wCol[i] = on ? 0.88 + 0.12 * wColN[i] : wColN[i];
+    wGeo.attributes.color.needsUpdate = true; whaleMesh.scale.setScalar(on ? MSCALE : 1.15);
+    mScars.forEach(function (m) { m.visible = on; }); mJaw.visible = on; mMouth.visible = false;
+  }
+  function updateMobyBits() {
+    var S, r, i;
+    mScars.forEach(function (m) {
+      var sd = m.userData.sd, k = m.userData.k, idx = 9 + k * 5; S = wsp[idx]; r = wradius(idx / WNL);
+      _mo1.copy(S.r).multiplyScalar(sd); _mo3.copy(S.t).multiplyScalar(0.88).addScaledVector(S.u, 0.47); _mo3.addScaledVector(_mo1, -_mo3.dot(_mo1)).normalize(); _mo2.crossVectors(_mo3, _mo1).normalize();
+      _mb.makeBasis(_mo1, _mo2, _mo3); m.quaternion.setFromRotationMatrix(_mb); m.position.copy(S.c).addScaledVector(S.r, sd * r * 0.985).addScaledVector(S.u, 0.04 * r);
+    });
+    S = wsp[14]; r = wradius(14 / WNL); var a = moby.jaw;
+    _mo4.copy(S.t).multiplyScalar(Math.cos(a)).addScaledVector(S.u, -Math.sin(a)); _mo2.crossVectors(_mo4, S.r).normalize(); _mo3.crossVectors(_mo2, _mo4).normalize();
+    _mb.makeBasis(_mo3, _mo2, _mo4); mJaw.quaternion.setFromRotationMatrix(_mb); mJaw.scale.set(r * 0.88, 0.24, 1.6);
+    _mo1.copy(S.c).addScaledVector(S.u, -r * 0.7); mJaw.position.copy(_mo1).addScaledVector(_mo4, 1.35);
+    mMouth.visible = a > 0.08; mMouth.quaternion.copy(mJaw.quaternion); mMouth.scale.set(r * 0.74, 0.1, 1.45); mMouth.position.copy(mJaw.position).addScaledVector(_mo2, 0.15);
+  }
+  function mobyFace(tgt, rate, dt) {
+    _mo1.copy(tgt).addScaledVector(moby.pos, -tgt.dot(moby.pos)); if (_mo1.lengthSq() < 1e-9) return; _mo1.normalize();
+    _mo2.crossVectors(moby.hdg, _mo1); var ang = Math.atan2(moby.pos.dot(_mo2), moby.hdg.dot(_mo1)), w = clamp(ang, -rate * dt, rate * dt);
+    _mo2.crossVectors(moby.pos, moby.hdg); moby.hdg.multiplyScalar(Math.cos(w)).addScaledVector(_mo2, Math.sin(w)); moby.hdg.addScaledVector(moby.pos, -moby.hdg.dot(moby.pos)).normalize();
+  }
+  /* the boat turns, slowly, to face the white whale as he rises, so the meeting always happens ahead of you */
+  function boatToward(rate, dt) {
+    _mo1.copy(moby.pos).addScaledVector(p, -moby.pos.dot(p)); if (_mo1.lengthSq() < 1e-9) return; _mo1.normalize();
+    _mo2.crossVectors(f, _mo1); var ang = Math.atan2(p.dot(_mo2), f.dot(_mo1)), w = clamp(ang, -rate * dt, rate * dt);
+    _mo2.crossVectors(p, f); f.multiplyScalar(Math.cos(w)).addScaledVector(_mo2, Math.sin(w)); f.addScaledVector(p, -f.dot(p)).normalize();
+  }
+  function mobyAway(rate, dt) { _mo3.copy(moby.pos).multiplyScalar(2).sub(p).normalize(); mobyFace(_mo3, rate, dt); }
+  function mobyMove(dt) {
+    var a = moby.speed * dt / R; if (a <= 0) return;
+    _mo1.copy(moby.pos).multiplyScalar(Math.cos(a)).addScaledVector(moby.hdg, Math.sin(a)); _mo2.copy(moby.hdg).multiplyScalar(Math.cos(a)).addScaledVector(moby.pos, -Math.sin(a));
+    moby.pos.copy(_mo1).normalize(); moby.hdg.copy(_mo2).addScaledVector(moby.pos, -_mo2.dot(moby.pos)).normalize();
+  }
+  function mobyOnTop() { _mo1.copy(p).sub(moby.pos); var chord = _mo1.length() * R, along = _mo1.dot(moby.hdg) * R, lat = Math.sqrt(Math.max(0, chord * chord - along * along)); return Math.abs(along) < 20 && lat < 6.5; }
+  /* when he looks up at you, the weather may begin to turn: 15%, or 45% if you have raised a teddy bear, and a point more for every poem in your journal that mentions a storm */
+  function mobyStormChance() {
+    var pr = (oddments['A teddy bear'] || 0) > 0 ? 0.45 : 0.15, n = 0;
+    journal.forEach(function (j) { var e = byId[j.id]; if (e && e.x && /\bstorm/i.test(e.x)) n++; });
+    return Math.min(1, pr + 0.01 * n);
+  }
+  function mobyStormRoll() { if (storm.target === 0 && Math.random() < mobyStormChance()) storm.timer = Math.min(storm.timer, 6 + Math.random() * 8); }
+  function mobyDist() { return Math.acos(clamp(p.dot(moby.pos), -1, 1)) * R; }
+  function mobyBegin() {
+    moby.s = 'rise'; moby.t = 0; moby.on = true; moby.said = false; moby.speed = 0; moby.jaw = 0; moby.pitch = 0; moby.y = 48; moby.callT = 0; whale.on = false;
+    /* he rises ahead of the boat, over open water: if ahead is shallow or land, he rises on the side that faces the Pacific */
+    _mo3.copy(f); _mo1.copy(p).multiplyScalar(Math.cos(34 / R)).addScaledVector(_mo3, Math.sin(34 / R)); var lg = v2ll(_mo1);
+    if (elevAt(lg.lat, lg.lon) > -1500) _mo3.copy(MARI).addScaledVector(p, -MARI.dot(p)).normalize();
+    _mo1.copy(p).multiplyScalar(Math.cos(27 / R)).addScaledVector(_mo3, Math.sin(27 / R)); moby.pos.copy(_mo1).normalize();
+    _mo2.copy(p).addScaledVector(moby.pos, -p.dot(moby.pos)); moby.hdg.copy(_mo2).normalize();
+    skinMoby(true); whaleMesh.visible = true;
+  }
+  function mobyEnd() { moby.s = 'idle'; moby.on = false; moby.cool = 60; moby.rest = 0; moby.stage = 0; skinMoby(false); whaleMesh.visible = false; whale.t = 300 + Math.random() * 300; }
+  function grantDoubloon() {
+    if (dbl.have) { toast('The white whale bows his great head', 'He remembers you.', 6500); return; }
+    dbl.have = true; dbl.on = true; store.set(KEY_DB, dbl); paintDoubloon(); if (snd) snd.chime();
+    toast('The Golden Doubloon', 'It slid from the white whale’s mouth, warm, with a whale stamped on one side. The coin beside the sound button switches its glint on and off, and it makes the poem closest to you wink.', 15000, null, true);
+  }
+  function paintDoubloon() { var b = $('btn-doubloon'); if (!b) return; b.hidden = !dbl.have; b.setAttribute('aria-pressed', dbl.on ? 'true' : 'false'); b.title = dbl.on ? 'The Golden Doubloon: on' : 'The Golden Doubloon: off'; }
+  (function () { var b = $('btn-doubloon'); if (!b) return; b.addEventListener('click', function () { if (!dbl.have) { cheatTrap(); return; } dbl.on = !dbl.on; store.set(KEY_DB, dbl); paintDoubloon(); snd.click(); }); paintDoubloon(); })();
+  /* silt lifting from the sea floor around the boat */
+  var SILT_N = 220, siltPos = new Float32Array(SILT_N * 3), siltG = new THREE.BufferGeometry(), siltSeed = [], siltPts;
+  (function () { for (var i = 0; i < SILT_N; i++) siltSeed.push({ a: Math.random() * TAU, r: 1.2 + Math.random() * 9, ph: Math.random(), sp: 0.1 + Math.random() * 0.14 }); siltG.setAttribute('position', new THREE.BufferAttribute(siltPos, 3));
+    siltPts = new THREE.Points(siltG, new THREE.PointsMaterial({ color: 0xBFAE8C, size: 0.7, map: glowTex, transparent: true, opacity: 0, depthWrite: false })); siltPts.frustumCulled = false; siltPts.visible = false; scene.add(siltPts); })();
+  function stepSilt(dt, t) {
+    if (moby.siltK < 0.01) { siltPts.visible = false; return; }
+    var ll = v2ll(p), floor = R - depthOf(elevAt(ll.lat, ll.lon)), i, s, h, x, z;
+    for (i = 0; i < SILT_N; i++) { s = siltSeed[i]; h = ((t * s.sp + s.ph) % 1) * 8; x = Math.cos(s.a + t * 0.05) * s.r; z = Math.sin(s.a + t * 0.05) * s.r;
+      siltPos[i * 3] = p.x * (floor + h) + right.x * x + f.x * z; siltPos[i * 3 + 1] = p.y * (floor + h) + right.y * x + f.y * z; siltPos[i * 3 + 2] = p.z * (floor + h) + right.z * x + f.z * z; }
+    siltG.attributes.position.needsUpdate = true; siltPts.visible = true; siltPts.material.opacity = 0.5 * moby.siltK;
+  }
+  function mobyPose(dt, t) {
+    _ty.copy(moby.pos); _tz.copy(moby.hdg).multiplyScalar(Math.cos(moby.pitch)).addScaledVector(moby.pos, -Math.sin(moby.pitch)); _tx.crossVectors(_ty, _tz).normalize(); _ty.crossVectors(_tz, _tx).normalize();
+    _mb.makeBasis(_tx, _ty, _tz); whaleMesh.quaternion.setFromRotationMatrix(_mb); whaleMesh.position.copy(moby.pos).multiplyScalar(R - moby.y);
+    var d = mobyDist(); whaleMesh.visible = zoomLin < 0.3 && d < 200; if (whaleMesh.visible) updateWhaleBody(t);
+    uWhale.value.copy(whaleMesh.position); uWhaleK.value += ((whaleMesh.visible ? 1 : 0) - uWhaleK.value) * Math.min(1, dt * 2);
+  }
+  function stepMoby(dt, t) {
+    var zd = Math.acos(clamp(p.dot(MZ), -1, 1)) * R, s = moby.s, k, d;
+    var duck = s !== 'idle' ? 1 : clamp((MZR * 1.8 - zd) / (MZR * 0.8), 0, 1);
+    moby.duckT -= dt; if (moby.duckT <= 0) { moby.duckT = 0.25; if (Math.abs(duck - mLastDuck) > 0.02) { mLastDuck = duck; snd.duck(duck); } }
+    stepSilt(dt, t);
+    if (s === 'idle') {
+      if (moby.cool > 0) moby.cool -= dt;
+      if (rest.on && zd < MZR && !modal && moby.cool <= 0 && zoomLin < 0.3) moby.rest += dt; else moby.rest = Math.max(0, moby.rest - 1.5 * dt);
+      moby.siltK += ((moby.rest >= 135 ? 1 : 0) - moby.siltK) * Math.min(1, dt * 0.3);
+      if (moby.rest >= 135 && moby.stage < 1) { moby.stage = 1; snd.rumble(0.55); }
+      if (moby.rest < 110 && moby.stage) moby.stage = 0;
+      if (moby.rest >= 150) { moby.stage = 2; snd.rumble(1); mobyBegin(); }
+      return;
+    }
+    moby.t += dt; moby.siltK += (((s === 'rise' || s === 'look') ? 1 : 0) - moby.siltK) * Math.min(1, dt * 0.25);
+    if (s === 'rise') {
+      k = clamp(moby.t / 9, 0, 1); moby.y = 48 - 43.4 * (1 - (1 - k) * (1 - k)); mobyFace(p, 0.5, dt); boatToward(0.5, dt);
+      if (moby.t > 9) { moby.s = 'look'; moby.t = 0; moby.said = false; mobyStormRoll(); }
+    } else if (s === 'look') {
+      moby.y = 4.6 + 0.35 * Math.sin(moby.t * 0.8); mobyFace(p, 0.25, dt); boatToward(0.3, dt);
+      if (moby.t > 2 && !moby.said) { moby.said = true; snd.moby(0.55); }
+      if (moby.t > 8) { moby.s = 'flee'; moby.t = 0; moby.speed = 0; moby.callT = 6; if (rest.on) exitRest(); snd.moby(1); }
+    } else if (s === 'flee') {
+      moby.speed = Math.min(8.5, moby.speed + 3.2 * dt); moby.y += (2.7 - moby.y) * Math.min(1, dt * 0.5);
+      _mo1.copy(moby.pos).multiplyScalar(Math.cos(12 / R)).addScaledVector(moby.hdg, Math.sin(12 / R)); var lf = v2ll(_mo1);
+      if (elevAt(lf.lat, lf.lon) > -1500) mobyFace(MARI, 2.2, dt); else if (moby.t < 4) mobyAway(0.9, dt); else mobyFace(MARI, 0.45, dt);
+      mobyMove(dt); moby.callT -= dt; if (moby.callT <= 0) { moby.callT = 7 + Math.random() * 4; snd.moby(0.9); }
+      if (mobyOnTop()) { moby.s = 'greet'; moby.t = 0; moby.said = false; }
+      else if (Math.acos(clamp(moby.pos.dot(MARI), -1, 1)) * R < 6 || moby.t > 260) { moby.s = 'dive'; moby.t = 0; moby.rings = 0; }
+    } else if (s === 'greet') {
+      moby.speed *= Math.pow(0.12, dt); mobyMove(dt); mobyFace(p, 0.9, dt);
+      k = clamp(moby.t / 3.5, 0, 1); k = k * k * (3 - 2 * k); moby.y = 2.7 - 4.3 * k; moby.pitch = -0.55 * k;
+      moby.jaw = 0.9 * clamp((moby.t - 2) / 1.4, 0, 1);
+      if (moby.t > 2 && !moby.said) { moby.said = true; snd.moby(1); ring(moby.pos, 4, 4, 0.6, 8); grantDoubloon(); }
+      if (moby.t > 6) { moby.s = 'surfaced'; moby.surfT = 0; }
+    } else if (s === 'surfaced') {
+      moby.surfT += dt; mobyFace(p, 0.3, dt); moby.y = -1.6 + 0.25 * Math.sin(moby.t * 0.6); moby.pitch = -0.55 + 0.04 * Math.sin(moby.t * 0.5);
+      moby.jaw = 0.9 * (1 - clamp((moby.surfT - 5) / 2, 0, 1)); moby.speed = 0;
+      if (moby.surfT > 300 || mobyDist() > 110) { moby.s = 'leave'; moby.t = 0; moby.rings = 0; snd.splash(1); ring(moby.pos, 4, 3.5, 0.6, 8); }
+    } else if (s === 'leave' || s === 'dive') {
+      k = clamp(moby.t / 5.5, 0, 1); moby.y += (40 - moby.y) * Math.min(1, dt * 0.6); moby.pitch += (0.35 - moby.pitch) * Math.min(1, dt); moby.jaw *= Math.pow(0.2, dt);
+      if (s === 'dive') { moby.speed *= Math.pow(0.35, dt); mobyMove(dt); }
+      if (moby.t > moby.rings * 0.6 && moby.rings < 5) { moby.rings++; ring(moby.pos, 4 + moby.rings, 4, 0.55, 9); if (moby.rings === 1) snd.splash(1); }
+      if (moby.t > 6) mobyEnd();
+    }
+    if (moby.on) mobyPose(dt, t);
   }
 
   /* ---------- reading mode and sharing ---------- */
@@ -7105,11 +7422,11 @@ window.DL_SND = (function () {
     var lines = [];
     if (e.x) { e.x.split('\n').forEach(function (ln) { if (!ln.trim()) { if (lines.length && lines[lines.length - 1] !== '') lines.push(''); return; } wrapText(g, ln.trim(), W - 190).forEach(function (w) { lines.push(w); }); }); }
     else lines = wrapText(g, e.n || 'A catalogue card, raised from the deep.', W - 190);
-    var maxL = 15, shown = lines.slice(0, maxL); if (lines.length > maxL) shown[maxL - 1] += ' …';
+    var limit = H - (j && j.note ? 330 : 200), shown = [], yy2 = y, li;
+    for (li = 0; li < lines.length; li++) { var step = lines[li] === '' ? 22 : 58; if (yy2 + step + 24 > limit) break; shown.push(lines[li]); yy2 += step; }
+    if (shown.length < lines.length && shown.length) { var last = shown.length - 1; while (last > 0 && shown[last] === '') last--; shown = shown.slice(0, last + 1); shown[last] += ' …'; }
     shown.forEach(function (l) { if (l === '') { y += 22; return; } g.fillText(l, 90, y + 24); y += 58; });
     if (j && j.note) { g.fillStyle = '#F1DC9A'; g.font = 'italic 400 34px ' + ff; wrapText(g, '\u201C' + j.note + '\u201D', W - 190).slice(0, 2).forEach(function (l, li) { g.fillText(l, 90, H - 260 + li * 44); }); }
-    g.fillStyle = '#9FBBC6'; g.font = 'italic 400 30px ' + ff;
-    g.fillText(j ? whereLine(j, e) : 'Raised from the drowned world', 90, H - 150);
     g.fillStyle = '#F1DC9A'; g.font = 'italic 500 34px ' + ff; g.fillText('What the water could not erase', 90, H - 90);
     return cv.toDataURL('image/png');
   }
@@ -7334,7 +7651,7 @@ window.DL_SND = (function () {
   var exT = 0, dayChkT = 0;
   function stepExtras(dt, t) {
     snd.tick(dt);
-    stepStorm(dt, t); stepWhale(dt, t); stepNotes(dt, t); stepBottle(dt, t); stepSky(dt, t);
+    stepStorm(dt, t); stepWhale(dt, t); stepMoby(dt, t); stepNotes(dt, t); stepBottle(dt, t); stepSky(dt, t);
     exT -= dt; if (exT <= 0) { exT = 0.25; checkLandmarks(); updateChip(); }
     dayChkT -= dt; if (dayChkT <= 0) { dayChkT = 30; ensureDay(); }
   }
@@ -7489,7 +7806,7 @@ function buildCloset() {
     b.appendChild(tk); b.appendChild(ic); b.appendChild(nm);
     if (!open) { var hn = document.createElement('span'); hn.className = 'hat-hint'; hn.textContent = H.hint; b.appendChild(hn); }
     b.setAttribute('aria-label', open ? H.name + (H.id === hatId ? ', worn' : '') : 'Locked. ' + H.hint);
-    b.addEventListener('click', function () { hatId = H.id; store.set(KEY_H, hatId); applyHat(); buildCloset(); snd.click(); });
+    b.addEventListener('click', function () { if (!hatOpen(H)) { cheatTrap(); return; } hatId = H.id; store.set(KEY_H, hatId); applyHat(); buildCloset(); snd.click(); });
     grid.appendChild(b);
   });
   $('hat-desc').textContent = n + ' of ' + total + ' hats found. Sail to monuments and wonders of the world to find more.';
@@ -7555,7 +7872,7 @@ function buildTackleGrid() {
     else hn.textContent = critText(L).replace(/^./, function (c) { return c.toUpperCase(); }) + ' (' + Math.max(0, (L.lm ? L.lm : L.n) - critLeft(L)) + ' of ' + (L.lm || L.n) + ')';
     if (!L.far) b.appendChild(hn);
     b.setAttribute('aria-label', open ? L.name + (L.id === cur ? ', in use' : '') : L.name + '. Locked. ' + hn.textContent);
-    b.addEventListener('click', function () { lureId = L.id; store.set(KEY_L, lureId); buildLureSelect(); snd.click(); });
+    b.addEventListener('click', function () { if (!lureOpen(L)) { cheatTrap(); return; } lureId = L.id; store.set(KEY_L, lureId); buildLureSelect(); snd.click(); });
     grid.appendChild(b);
   });
   var lh = lureHint(), ld = $('lure-desc'); ld.textContent = lh; ld.hidden = !lh;
@@ -7614,6 +7931,13 @@ $('sub-copy').addEventListener('click', function () {
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { $('sub-preview').select(); $('sub-copied').textContent = 'Select the text above and copy it.'; });
   else { $('sub-preview').select(); try { document.execCommand('copy'); done(); } catch (e) { $('sub-copied').textContent = 'Select the text above and copy it.'; } }
 });
+
+/* if the Librarian had to rub anything out, there is a note */
+if (tamperLog.length) setTimeout(function () {
+  var names = { casts: 'cast count', wonders: 'weather log', lureUnlocked: 'tackle box', hatsUnlocked: 'closet', secretHat: 'closet', lights: 'lantern log', landmarks: 'landmark list', doubloon: 'coin purse', mark: 'signature', daily: 'bottle diary', oddments: 'odds and ends', journal: 'journal' }, seen = {}, list = [];
+  tamperLog.forEach(function (k) { var n = names[k.replace('drownedLibrary.', '').replace(/\.v\d$/, '')] || 'journal'; if (!seen[n]) { seen[n] = 1; list.push(n); } });
+  toast('Pencil marks in the margins', 'The Librarian found some tidy corrections in your ' + list.join(', ') + ', rubbed them out, and left a note: “It is much more fun when you earn it.” Nothing else was touched.', 14000);
+}, 2600);
 
 
   /* ------------------------------------------------------------------
