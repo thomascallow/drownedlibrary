@@ -501,7 +501,8 @@ body.rest #hud, body.rest #hud * { pointer-events: none !important; }
 @keyframes inkdraw { to { stroke-dashoffset: 0; } }
 @keyframes inkwobble { 0% { transform: rotate(0); } 25% { transform: rotate(-9deg) scale(1.08); } 60% { transform: rotate(6deg); } 100% { transform: rotate(0); } }
 @media (prefers-reduced-motion: reduce) { .story-x.drawing path { animation: none; stroke-dashoffset: 0; } .story-x.wobble svg { animation: none; } }
-@media (max-width: 520px) { .story-x { position: static; transform: none; margin-left: 0.4rem; } }
+/* on a narrow screen the signature sits in the margin just above the buttons, and takes no room of its own */
+@media (max-width: 520px) { .story-x { top: auto; bottom: calc(100% + 0.1rem); right: 0.1rem; transform: none; width: 2.6rem; height: 2.6rem; } }
 
 .margin select, #voice-select { appearance: none; -webkit-appearance: none; font: inherit; padding: 0.5rem 2.1rem 0.5rem 0.7rem; border-radius: 6px; border: 1px solid var(--rule); width: 100%; box-sizing: border-box; color: var(--ink); cursor: pointer; line-height: 1.3;
   background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%234A567A' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 0.8rem center / 0.75rem; }
@@ -524,11 +525,10 @@ button, a, .joy, #world, .hud, .toast { touch-action: manipulation; -webkit-user
   .status { grid-column: 1 / -1; grid-row: 1; text-align: center; font-size: 0.95rem; }
   .weigh-manual { grid-column: 1 / -1; grid-row: 2; }
   .tension { grid-column: 1 / -1; grid-row: 2; justify-self: center; margin-bottom: 0.8rem; }
-  .joy { display: block; grid-column: 2; grid-row: 3; position: relative; width: 128px; height: 128px; margin: 0 6px 8px 0; touch-action: none; opacity: 0.36; transition: opacity 0.45s ease; }
   .joy.on { opacity: 0.15; transition: opacity 0.12s ease; }
   .joy-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--btn-ink); background: radial-gradient(circle, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 70%); }
   .joy-knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: var(--btn-ink); opacity: 0.6; transform: translate(var(--jx, 0px), var(--jy, 0px)); }
-  .primary#btn-cast { grid-column: 3; grid-row: 3; justify-self: start; align-self: end; margin: 0 0 20px 8px; white-space: nowrap; padding: 0.85rem 1.25rem; font-size: 1.02rem; }
+  .primary#btn-cast { grid-column: 1 / -1; grid-row: 3; justify-self: center; align-self: end; margin: 0 0 20px; white-space: nowrap; padding: 0.85rem 1.25rem; font-size: 1.02rem; }
   .hint { display: none; }
 }
 
@@ -584,6 +584,11 @@ button, a, .joy, #world, .hud, .toast { touch-action: manipulation; -webkit-user
 #trail .linkish { margin-top: 0.3rem; padding: 0.15rem 0.7rem; border: 1px solid rgba(242, 217, 138, 0.5); border-radius: 999px; font-size: 0.72rem; text-decoration: none; letter-spacing: 0.04em; opacity: 0.9; background: transparent; }
 @media (max-width: 640px) { #trail { width: 9.4rem; } #trail .compass { width: 80px; height: 80px; } }
 
+#world { touch-action: none; }
+.toast.over { z-index: 60; bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 1rem); box-shadow: 0 10px 34px rgba(4, 8, 24, 0.5); }
+.tap-hint { display: none; }
+@media (pointer: coarse) { .tap-hint { display: block; grid-column: 1 / -1; grid-row: 2; justify-self: center; margin: 0 0 0.6rem; padding: 0.3rem 0.9rem; border-radius: 999px; font-style: italic; font-size: 0.92rem; color: var(--world-ink); background: rgba(8, 14, 34, 0.34); text-shadow: var(--halo); } .tap-hint[hidden] { display: none; } }
+
 </style>
 </head>
 <body>
@@ -637,7 +642,7 @@ button, a, .joy, #world, .hud, .toast { touch-action: manipulation; -webkit-user
   </div>
 
   <footer class="bottom">
-    <div id="joy" class="joy" aria-hidden="true"><div class="joy-ring"></div><div class="joy-knob"></div></div>
+    <p id="tap-hint" class="tap-hint" hidden>Tap the water to sail there</p>
     <div class="act">
       <div id="power" class="tension power" hidden><span id="power-mark" class="tm"></span><em class="tl l">near</em><em class="tl r">far</em></div>
       <div id="tension" class="tension" hidden><span class="tz"></span><span id="tension-mark" class="tm"></span><em class="tl l">resting</em><em class="tl r">pulling</em></div>
@@ -672,9 +677,9 @@ button, a, .joy, #world, .hud, .toast { touch-action: manipulation; -webkit-user
   <p>You have a boat, a line, and a lure you can weight to any depth. The water is murky, but where you stop to fish it clears, and you may see what still stands below. Sometimes you raise a poem, sometimes a boot.</p>
   <p class="quiet">Whatever you raise is written into your Angler’s journal, which is kept in this browser.</p>
   <dl class="keys">
-    <div><dt>Row</dt><dd>Arrow keys or WASD, or the buttons on a touch screen</dd></div>
+    <div><dt>Row</dt><dd>Arrow keys or WASD. On a touch screen, tap the water and the boat sails there</dd></div>
     <div><dt>Fish</dt><dd>Space to cast: the first press sets how far, the second sets how deep. Then hold Space to reel when something bites</dd></div>
-    <div><dt>Look</dt><dd>G shows the globe. Drag to turn it, click a country to sail there</dd></div>
+    <div><dt>Look</dt><dd>G shows the globe. Drag to turn it, click or tap a country to sail there</dd></div>
     <div><dt><i>Read</i></dt><dd>R opens your journal, where every poem you have raised waits to be read again</dd></div>
     <div><dt>Rest</dt><dd>Z hides the interface and lets the boat drift</dd></div>
     <div><dt>Watch</dt><dd>Bottles drift by on the water. Keep an eye out for them</dd></div>
@@ -8546,7 +8551,7 @@ window.DL_SND = (function () {
     toastCur = t; ui.toastTitle.textContent = t.title; ui.toastText.textContent = t.text || ''; ui.toastText.hidden = !t.text;
     var ab = $('toast-act');
     if (t.act) { ab.textContent = t.act.label; ab.hidden = false; ab.onclick = function () { var fn = t.act.fn; fn(); showNextToast(); }; } else { ab.hidden = true; ab.onclick = null; }
-    ui.toast.hidden = true; void ui.toast.offsetWidth; ui.toast.hidden = false; toastMore();
+    ui.toast.classList.toggle('over', !!t.over); ui.toast.hidden = true; void ui.toast.offsetWidth; ui.toast.hidden = false; toastMore();
     armToast();
   }
   /* how long a notice stays: its own time plus a little (or a lot), or until you dismiss it */
@@ -8557,8 +8562,8 @@ window.DL_SND = (function () {
     toastTimer = setTimeout(showNextToast, Math.max(toastCur.ms, 5000) + TOAST_EXTRA[toastSetting] * 1000);
   }
   /* Messages that arrive together wait their turn: each has its own time, and can be sent on early. */
-  function toast(title, text, ms, act, front) {
-    var t = { title: title, text: text, ms: ms || 6500, act: act };
+  function toast(title, text, ms, act, front, over) {
+    var t = { title: title, text: text, ms: ms || 6500, act: act, over: !!over };
     if (front) { if (toastCur) toastQ.unshift(toastCur); toastQ.unshift(t); toastCur = null; showNextToast(); return; }
     toastQ.push(t); if (toastQ.length > 8) toastQ.shift();
     if (!toastCur && !toastPaused) showNextToast(); else toastMore();
@@ -8992,17 +8997,20 @@ window.DL_SND = (function () {
     placeBoat(lat, lon); camDir.copy(f); follow.copy(p).multiplyScalar(R + 0.5); SC.force = true; hov.hidden = true;
     scanNear(); scenEnv(); updateWhere(); updateMonuments(3); setGlobe(false);
   }
+  var globeSpin = null;
   (function () {
     var cv = $('world'), drag = null;
     cv.addEventListener('pointerdown', function (ev) {
-      downAt = { x: ev.clientX, y: ev.clientY, t: performance.now() };
-      if (globeLive()) { drag = { x: ev.clientX, y: ev.clientY, moved: false }; try { cv.setPointerCapture(ev.pointerId); } catch (e) {} }
+      downAt = { x: ev.clientX, y: ev.clientY, t: performance.now() }; globeSpin = null;
+      if (globeLive()) { drag = { x: ev.clientX, y: ev.clientY, moved: false, t: ev.timeStamp, vlon: 0, vlat: 0 }; try { cv.setPointerCapture(ev.pointerId); } catch (e) {} }
     });
     cv.addEventListener('pointerup', function (ev) {
-      var wasDrag = drag && drag.moved; drag = null;
-      if (!downAt || !globeLive()) { downAt = null; return; }
+      var wasDrag = drag && drag.moved, dr = drag; drag = null;
+      if (!downAt) return;
       var dx = ev.clientX - downAt.x, dy = ev.clientY - downAt.y, dtm = performance.now() - downAt.t; downAt = null;
-      if (wasDrag || dx * dx + dy * dy > 64 || dtm > 700) return;
+      if (!globeLive()) { if (dx * dx + dy * dy <= 144 && dtm < 600 && ev.pointerType !== 'mouse') tapToGo(ev.clientX, ev.clientY); return; }
+      if (wasDrag) { if (ev.pointerType !== 'mouse' && dr && ev.timeStamp - dr.t < 160 && (dr.vlon * dr.vlon + dr.vlat * dr.vlat) > 100) globeSpin = { vlon: dr.vlon, vlat: dr.vlat }; return; }
+      if (dx * dx + dy * dy > 64 || dtm > 700) return;
       var hit = pickGlobe(ev.clientX, ev.clientY); if (!hit) return;
       var tg = travelTarget(hit); travelTo(tg.lat, tg.lon);
     });
@@ -9011,7 +9019,10 @@ window.DL_SND = (function () {
         var ddx = ev.clientX - drag.x, ddy = ev.clientY - drag.y;
         if (!drag.moved && ddx * ddx + ddy * ddy < 25) return;
         drag.moved = true; hov.hidden = true;
-        var gl = v2ll(globeCenter), k = 160 / window.innerHeight; gl.lon -= ddx * k; gl.lat = clamp(gl.lat + ddy * k, -82, 82); ll2v(gl.lat, gl.lon, globeCenter);
+        /* on a touch screen a swipe turns the globe about half as far again, and it carries on a moment after you let go */
+        var gl = v2ll(globeCenter), k = (ev.pointerType === 'mouse' ? 160 : 250) / window.innerHeight, nw = ev.timeStamp, dts = Math.max(0.008, (nw - drag.t) / 1000);
+        var dlon = -ddx * k, dlat = ddy * k; gl.lon += dlon; gl.lat = clamp(gl.lat + dlat, -82, 82); ll2v(gl.lat, gl.lon, globeCenter);
+        drag.vlon = lerp(drag.vlon, dlon / dts, 0.5); drag.vlat = lerp(drag.vlat, dlat / dts, 0.5); drag.t = nw;
         drag.x = ev.clientX; drag.y = ev.clientY; return;
       }
       if (!globeLive() || ev.pointerType === 'touch') { hov.hidden = true; return; }
@@ -9193,10 +9204,51 @@ window.DL_SND = (function () {
   right.crossVectors(f, p).normalize();
   for (var mi = 0; mi < MOTES; mi++) seedMote(mi, true);
 
+  /* tap the water to sail there: a gold arrow drops onto the spot, a ring spreads from it, and the boat turns and rows to it on its own.
+     Any key, a new tap, casting a line or opening a page lets the boat go back to the oars. */
+  var goTo = null, goFade = 0, apRow = false, KEY_TAP = 'drownedLibrary.tapHint.v1', tapSeen = !!store.get(KEY_TAP, false), tapHintEl = $('tap-hint');
+  var goMark = new THREE.Group(), _goUp = new V3(0, 1, 0);
+  var goArrow = new THREE.Mesh(new THREE.ConeGeometry(0.62, 1.5, 4), new THREE.MeshBasicMaterial({ color: 0xF2D98A, transparent: true, opacity: 0.95, depthTest: false }));
+  var goRing = new THREE.Mesh(new THREE.RingGeometry(0.82, 1.02, 44), new THREE.MeshBasicMaterial({ color: 0xF2D98A, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthTest: false }));
+  goArrow.rotation.x = Math.PI; goRing.rotation.x = -Math.PI / 2; goArrow.renderOrder = 9; goRing.renderOrder = 9; goMark.add(goArrow); goMark.add(goRing); goMark.visible = false; scene.add(goMark);
+  function setGoTo(q) {
+    goTo = { q: q.clone(), age: 0, best: 1e9, stall: 0 }; goFade = 1; goMark.visible = true;
+    goMark.position.copy(q).multiplyScalar(R + 0.1); goMark.quaternion.setFromUnitVectors(_goUp, q);
+    if (!tapSeen) { tapSeen = true; store.set(KEY_TAP, true); }
+  }
+  function clearGoTo() { if (goTo) { goTo = null; goFade = 0.999; } }
+  function stepGoMark(t, dt) {
+    if (!goMark.visible) return;
+    if (!goTo) { goFade -= dt * 2.2; if (goFade <= 0) { goMark.visible = false; return; } }
+    var k = goTo ? 1 : goFade, ph = (t * 1.3) % 1;
+    goArrow.position.y = 1.5 + 0.38 * Math.sin(t * 5.2); goArrow.scale.setScalar(0.7 + 0.3 * k); goArrow.material.opacity = 0.95 * k;
+    goRing.scale.setScalar((0.8 + 0.9 * ph) * (0.6 + 0.4 * k)); goRing.material.opacity = 0.8 * k * (1 - ph);
+  }
+  function tapToGo(cx, cy) {
+    if (modal || veilBusy || rest.on || fish.state !== 'idle' || zoomTarget > 0.5 || zoomLin > 0.2) return;
+    var hit = pickGlobe(cx, cy); if (!hit) return;
+    var dist = Math.acos(clamp(hit.q.dot(p), -1, 1)) * R;
+    if (dist < 3.5) { clearGoTo(); return; }
+    setGoTo(hit.q);
+  }
   function stepBoat(dt) {
     var canSail = !modal && !veilBusy && fish.state === 'idle' && zoomTarget < 0.5;
     var jAct = joy.x !== 0 || joy.y !== 0;
+    var manual = key.up || key.down || key.left || key.right || jAct;
+    if (goTo && (!canSail || manual)) clearGoTo();
     var thr = canSail ? (jAct ? joy.y : (key.up ? 1 : 0) - (key.down ? 1 : 0)) : 0, st = canSail ? (jAct ? joy.x : (key.right ? 1 : 0) - (key.left ? 1 : 0)) : 0;
+    apRow = false;
+    if (goTo) {
+      goTo.age += dt; _a.copy(goTo.q).addScaledVector(p, -goTo.q.dot(p)); var gd = Math.acos(clamp(goTo.q.dot(p), -1, 1)) * R;
+      if (_a.lengthSq() > 1e-12) _a.normalize();
+      right.crossVectors(f, p).normalize();
+      var err = Math.atan2(_a.dot(right), _a.dot(f)), ae = Math.abs(err);
+      st = clamp(err * 1.8, -1, 1); thr = ae < 0.9 ? 1 : (ae < 1.8 ? 0.35 : 0.1); if (gd < 7.5) thr = 0;
+      apRow = thr > 0.05 || gd >= 2.2;
+      /* arrived, or coasting to a stop beside it, or held up by something in the way */
+      if (gd < 2.2 || (gd < 9 && boat.v < 0.25 && goTo.age > 1)) clearGoTo();
+      else { if (gd < goTo.best - 0.5) { goTo.best = gd; goTo.stall = 0; } else goTo.stall += dt; if (goTo.stall > 5) clearGoTo(); }
+    }
     boat.idleT = (canSail && thr === 0 && st === 0) ? (boat.idleT || 0) + dt : 0;
     if (rest.on && canSail) st = 0;
     var wind = (storm.k > 0.5 && canSail) ? 2 : 1, pull = (wind > 1 ? 1 : 0.6 + 0.4 * Math.max(0, Math.sin(rowPh))) * wind;
@@ -9248,7 +9300,7 @@ window.DL_SND = (function () {
     var amb = reduce ? 0 : 1;
     sailPivot.rotation.y = lerp(0.55, 0.04, rodK) + amb * 0.06 * Math.sin(t * 0.7) + boat.steer * 0.25;
     sailPivot.scale.z = 1 + amb * 0.04 * Math.sin(t * 0.9 + 1);
-    var anyIn = !modal && !veilBusy && zoomTarget < 0.5 && fish.state === 'idle' && (key.up || key.down || key.left || key.right);
+    var anyIn = !modal && !veilBusy && zoomTarget < 0.5 && fish.state === 'idle' && (key.up || key.down || key.left || key.right || (goTo && apRow));
     idleT = anyIn ? 0 : idleT + curDt;
     sailMode = ease(sailMode, (storm.k > 0.5 && fish.state === 'idle') ? 1 : 0, curDt, 1.2);
     rowK = ease(rowK, (anyIn && sailMode < 0.5) ? 1 : 0, curDt, 3.2);
@@ -9328,6 +9380,7 @@ window.DL_SND = (function () {
     _look.copy(follow).addScaledVector(_up, 0.5).addScaledVector(camDir, 3 * m);
 
     if (zoomTarget < 0.5) globeCenter.lerp(p, 1 - Math.pow(0.001, dt)).normalize();
+    else if (globeSpin && globeLive()) { var gs = v2ll(globeCenter); gs.lon += globeSpin.vlon * dt; gs.lat = clamp(gs.lat + globeSpin.vlat * dt, -82, 82); ll2v(gs.lat, gs.lon, globeCenter); var dec = Math.pow(0.06, dt); globeSpin.vlon *= dec; globeSpin.vlat *= dec; if (globeSpin.vlon * globeSpin.vlon + globeSpin.vlat * globeSpin.vlat < 4) globeSpin = null; }
     var rate = reduce ? 1000 : 1 / 2.8;
     if (zoomLin < zoomTarget) zoomLin = Math.min(zoomTarget, zoomLin + rate * dt); else if (zoomLin > zoomTarget) zoomLin = Math.max(zoomTarget, zoomLin - rate * dt);
     var z = zoomLin < 0.5 ? 4 * zoomLin * zoomLin * zoomLin : 1 - Math.pow(-2 * zoomLin + 2, 3) / 2;
@@ -9438,7 +9491,8 @@ window.DL_SND = (function () {
     curDt = dt; uTime.value += dt; ambient += dt;
     var t = uTime.value;
 
-    stepBoat(dt);
+    stepBoat(dt); stepGoMark(t, dt);
+    if (tapHintEl) { var showTap = touch && !tapSeen && !modal && fish.state === 'idle' && zoomTarget < 0.5; if (tapHintEl.hidden === showTap) tapHintEl.hidden = !showTap; }
     placeBoatMesh(t);
     boatGroup.updateMatrixWorld(true);
     uBoat.value.copy(boatWorld);
@@ -11031,7 +11085,7 @@ function unlockSecretHat() {
   x.classList.remove('wobble'); void x.offsetWidth; x.classList.add('wobble');
   secretHat = true; store.set(KEY_SH, true); unlockedH.push('spotted'); store.set(KEY_HU, unlockedH); buildCloset(); if (snd) snd.chime();
   setTimeout(function () { x.disabled = true; }, 520);
-  toast('X marks the spot-ted hat.', 'Find it in Davy Jones’ Closet.', 9000, null, true);
+  toast('Something just fell in Davy Jones’ Closet', 'X marks the spot-ted hat.', 9000, null, true, true);
 }
 function checkHats(announce) {
   var fresh = []; HATS.forEach(function (H) { if (hatOpen(H) && unlockedH.indexOf(H.id) < 0) { unlockedH.push(H.id); fresh.push(H); } });
